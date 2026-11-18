@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Warehouse,
   CheckCircle2,
   Package,
   Scale,
@@ -9,11 +8,10 @@ import {
   PlusCircle,
   CheckSquare,
   RefreshCw,
-  ShieldCheck,
-  AlertTriangle,
-  FlaskConical,
-  FileCheck2,
   TrendingUp,
+  Coins,
+  Layers,
+  BarChart3,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -33,17 +31,26 @@ import {
 import { motion } from 'motion/react';
 import { apiFetch } from '../utils/api';
 import {
+  COTIZACIONES_OFICIALES_FALLBACK,
+  CotizacionReferencia,
+  LoteItem,
+  TIPO_CAMBIO_OFICIAL_BOB,
+  calcularValorizacionGrupo,
   formatearEnteroBolivia,
+  formatearMonedaBob,
+  formatearMonedaUsd,
   formatearNumeroBolivia,
   formatearFechaBolivia,
 } from '../utils/calculations';
-import { CommandCenter3DScene } from '../components/three/MineralThreeScenes';
 import { useUIPreferences } from '../context/UIPreferencesContext';
 
 export function DashboardPage() {
   const { tema } = useUIPreferences();
   const esOscuro = tema === 'dark';
   const [data, setData] = useState<any>(null);
+  const [lotesDisp, setLotesDisp] = useState<LoteItem[]>([]);
+  const [cotizaciones, setCotizaciones] = useState<CotizacionReferencia[]>(COTIZACIONES_OFICIALES_FALLBACK);
+  const [tipoCambio, setTipoCambio] = useState<number>(TIPO_CAMBIO_OFICIAL_BOB);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -52,8 +59,17 @@ export function DashboardPage() {
     setCargando(true);
     setError('');
     try {
-      const res = await apiFetch('/api/dashboard');
+      const [res, resLotes, resCot] = await Promise.all([
+        apiFetch('/api/dashboard'),
+        apiFetch<{ lotes: LoteItem[] }>('/api/lotes?estado=DISPONIBLE'),
+        apiFetch<{ cotizaciones: CotizacionReferencia[]; tipoCambioBobUsd?: number }>('/api/cotizaciones').catch(
+          () => ({ cotizaciones: COTIZACIONES_OFICIALES_FALLBACK, tipoCambioBobUsd: TIPO_CAMBIO_OFICIAL_BOB })
+        ),
+      ]);
       setData(res);
+      setLotesDisp(resLotes.lotes || []);
+      if (resCot.cotizaciones?.length) setCotizaciones(resCot.cotizaciones);
+      if (resCot.tipoCambioBobUsd) setTipoCambio(resCot.tipoCambioBobUsd);
     } catch (err: any) {
       setError(err.message || 'No se pudo cargar la información del panel.');
     } finally {
@@ -64,6 +80,27 @@ export function DashboardPage() {
   useEffect(() => {
     cargarDashboard();
   }, []);
+
+  const valorizacionStock = useMemo(
+    () => calcularValorizacionGrupo(lotesDisp, cotizaciones, false, tipoCambio),
+    [lotesDisp, cotizaciones, tipoCambio]
+  );
+
+  const resumenPorMineral = useMemo(() => {
+    const grupos = new Map<string, LoteItem[]>();
+    for (const l of lotesDisp) {
+      const k = l.tipoMineral || 'Otros';
+      const arr = grupos.get(k) || [];
+      arr.push(l);
+      grupos.set(k, arr);
+    }
+    return Array.from(grupos.entries())
+      .map(([mineral, lista]) => ({
+        mineral,
+        val: calcularValorizacionGrupo(lista, cotizaciones, false, tipoCambio),
+      }))
+      .sort((a, b) => b.val.valorNetoTotalBob - a.val.valorNetoTotalBob);
+  }, [lotesDisp, cotizaciones, tipoCambio]);
 
   if (cargando && !data) {
     return (
@@ -151,105 +188,144 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* HERO ASIMÉTRICO: Vista 3D + Tarjetas de Totales Diferenciadas por Color */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        <div className="lg:col-span-7">
-          <CommandCenter3DScene
-            lotesDisponibles={ind.lotesDisponibles}
-            lotesVendidos={ind.lotesVendidos}
-            pesoDisponibleKg={ind.pesoTotalDisponibleKg}
-            pesoVendidoKg={ind.pesoTotalVendidoKg}
-            onNavigate={(ruta) => navigate(ruta)}
-          />
+      {/* Resumen Operativo y Valorizado en Bs */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="bg-gradient-to-br from-[#0891B2] via-[#0E7490] to-[#064E3B] dark:from-[#0B2538] dark:via-[#082B3A] dark:to-[#052E2B] text-white rounded-2xl p-5 shadow-md border border-emerald-400/40 flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-cyan-200">Lotes Disponibles en Almacén</span>
+            <Layers className="w-5 h-5 text-emerald-300" />
+          </div>
+          <div className="text-3xl font-mono-num font-extrabold mt-2">
+            {formatearEnteroBolivia(ind.lotesDisponibles)} lotes
+          </div>
+          <div className="flex items-center justify-between text-xs text-cyan-100 mt-3 pt-2 border-t border-white/15">
+            <span>Total históricos: {formatearEnteroBolivia(ind.totalLotesRegistrados)}</span>
+            <button onClick={() => navigate('/almacen')} className="font-bold text-amber-300 hover:underline inline-flex items-center gap-1">
+              Ver <ArrowUpRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
-        {/* Columna derecha de métricas */}
-        <div className="lg:col-span-5 flex flex-col justify-between gap-4">
-          {/* Tarjeta Principal: Lotes Disponibles */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-br from-[#0891B2] via-[#0E7490] to-[#064E3B] dark:from-[#0B2538] dark:via-[#082B3A] dark:to-[#052E2B] text-white rounded-2xl p-5 shadow-md border border-emerald-400/40 flex-1 flex flex-col justify-between transition-colors"
-          >
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-cyan-200">
-                Lotes Disponibles en Almacén
-              </span>
-              <span className="px-3 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400 text-slate-950 font-mono-num">
-                LISTOS PARA VENDER
-              </span>
-            </div>
+        <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-violet-500 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-violet-600 dark:text-violet-400">Sacos en Almacén</span>
+            <Package className="w-5 h-5 text-violet-500" />
+          </div>
+          <div className="text-3xl font-mono-num font-extrabold text-[#0F172A] dark:text-[#F8FAFC] mt-2">
+            {formatearEnteroBolivia(ind.totalSacosDisponibles)} sacos
+          </div>
+          <div className="text-xs font-mono-num text-[#64748B] dark:text-[#94A3B8] mt-3 pt-2 border-t border-[#E2E8F0] dark:border-[#152E42] flex items-center justify-between gap-2">
+            <span>{formatearNumeroBolivia(valorizacionStock.pesoPromedioPorSacoKg, 2)} kg/saco</span>
+            <span>{formatearNumeroBolivia(valorizacionStock.sacosPromedioPorLote, 1)} sacos/lote</span>
+          </div>
+        </div>
 
-            <div className="grid grid-cols-2 gap-4 my-3">
-              <div>
-                <div className="text-4xl font-mono-num font-extrabold text-white">
-                  {formatearEnteroBolivia(ind.lotesDisponibles)}
-                </div>
-                <div className="text-xs text-cyan-100 mt-0.5">
-                  Lotes físicos · {formatearEnteroBolivia(ind.totalSacosDisponibles)} sacos
-                </div>
-              </div>
-              <div className="border-l border-white/20 pl-4">
-                <div className="text-2xl font-mono-num font-extrabold text-amber-300">
-                  {formatearNumeroBolivia(ind.pesoTotalDisponibleKg, 2)} kg
-                </div>
-                <div className="text-xs text-emerald-200 font-mono-num mt-0.5">
-                  Peso sin humedad: {formatearNumeroBolivia(ind.pesoTotalSecoDisponibleKg || ind.pesoTotalDisponibleKg, 2)} kg
-                </div>
-                <div className="text-xs text-cyan-200/80 font-mono-num">
-                  ({formatearNumeroBolivia(ind.pesoTotalDisponibleTm, 3)} toneladas)
-                </div>
-              </div>
-            </div>
+        <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-amber-500 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-amber-600 dark:text-amber-400">Peso Disponible</span>
+            <Scale className="w-5 h-5 text-amber-500" />
+          </div>
+          <div className="text-2xl font-mono-num font-extrabold text-[#0F172A] dark:text-[#F8FAFC] mt-2">
+            {formatearNumeroBolivia(ind.pesoTotalDisponibleKg, 2)} kg
+          </div>
+          <div className="text-xs font-mono-num text-[#64748B] dark:text-[#94A3B8] mt-3 pt-2 border-t border-[#E2E8F0] dark:border-[#152E42] flex items-center justify-between gap-2">
+            <span>Seco: {formatearNumeroBolivia(ind.pesoTotalSecoDisponibleKg || ind.pesoTotalDisponibleKg, 2)} kg</span>
+            <span>{formatearNumeroBolivia(ind.pesoTotalDisponibleTm, 2)} TM</span>
+          </div>
+        </div>
 
-            <div className="pt-3 border-t border-white/20 flex items-center justify-between text-xs">
-              <span>Total registrados: {formatearEnteroBolivia(ind.totalLotesRegistrados)} lotes</span>
-              <button
-                onClick={() => navigate('/almacen')}
-                className="font-bold text-amber-300 hover:underline inline-flex items-center gap-1"
-              >
-                <span>Ver en Mi Almacén</span>
-                <ArrowUpRight className="w-4 h-4" />
-              </button>
-            </div>
-          </motion.div>
+        <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-emerald-500 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Valor Estimado Stock (Bs)</span>
+            <Coins className="w-5 h-5 text-emerald-500" />
+          </div>
+          <div className="text-2xl font-mono-num font-extrabold text-emerald-600 dark:text-emerald-400 mt-2">
+            {formatearMonedaBob(valorizacionStock.valorNetoTotalBob)}
+          </div>
+          <div className="text-xs font-mono-num text-[#64748B] dark:text-[#94A3B8] mt-3 pt-2 border-t border-[#E2E8F0] dark:border-[#152E42] flex justify-between">
+            <span>{formatearMonedaUsd(valorizacionStock.valorNetoTotalUsd)}</span>
+            <strong className="text-[#0F172A] dark:text-[#F8FAFC]">{formatearMonedaBob(valorizacionStock.valorPromedioPorSacoBob)}/saco</strong>
+          </div>
+        </div>
+      </div>
 
-          {/* Par de Tarjetas Secundarias Contrastadas (Coral y Violeta) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-rose-500 rounded-2xl p-4 shadow-sm transition-colors">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase text-rose-600 dark:text-rose-400">
-                  Lotes Vendidos
-                </span>
-                <CheckCircle2 className="w-5 h-5 text-rose-500" />
-              </div>
-              <div className="text-2xl font-mono-num font-extrabold text-[#0F172A] dark:text-[#F8FAFC] mt-1.5">
-                {formatearEnteroBolivia(ind.lotesVendidos)} lotes
-              </div>
-              <div className="text-xs font-mono-num font-bold text-rose-600 dark:text-rose-400 mt-1">
+      {/* Desglose detallado de Sacos y Valor en Bs por Mineral + Resumen de Ventas */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <div className="lg:col-span-8 bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-bold text-[#0F172A] dark:text-[#F8FAFC]">
+              Detalle del Almacén por Mineral, Sacos y Valor en Bolivianos
+            </h2>
+            <button
+              onClick={() => navigate('/reportes')}
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-cyan-600 dark:text-cyan-400 hover:underline"
+            >
+              <BarChart3 className="w-4 h-4" /> Reportes y Estadísticas
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-[#E2E8F0] dark:border-[#152E42] text-[#64748B] dark:text-[#94A3B8]">
+                  <th>Tipo de Mineral</th>
+                  <th className="text-right">Lotes</th>
+                  <th className="text-right">Sacos</th>
+                  <th className="text-right">kg / Saco</th>
+                  <th className="text-right">Peso Total</th>
+                  <th className="text-right">Bs / Saco</th>
+                  <th className="text-right">Valor Estimado (Bs)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E2E8F0] dark:divide-[#152E42]">
+                {resumenPorMineral.map(({ mineral, val }) => (
+                  <tr key={mineral} className="hover:bg-slate-50 dark:hover:bg-[#0F2232]/50">
+                    <td className="py-3 font-bold text-[#0F172A] dark:text-[#F8FAFC]">{mineral}</td>
+                    <td className="py-3 text-right font-mono-num">{val.totalLotes}</td>
+                    <td className="py-3 text-right font-mono-num font-bold text-violet-600 dark:text-violet-400">
+                      {formatearEnteroBolivia(val.totalSacos)}
+                    </td>
+                    <td className="py-3 text-right font-mono-num">{formatearNumeroBolivia(val.pesoPromedioPorSacoKg, 1)} kg</td>
+                    <td className="py-3 text-right font-mono-num">{formatearNumeroBolivia(val.pesoTotalKg, 2)} kg</td>
+                    <td className="py-3 text-right font-mono-num text-amber-600 dark:text-amber-400 font-semibold">
+                      {formatearMonedaBob(val.valorPromedioPorSacoBob)}
+                    </td>
+                    <td className="py-3 text-right font-mono-num font-bold text-emerald-600 dark:text-emerald-400">
+                      {formatearMonedaBob(val.valorNetoTotalBob)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="lg:col-span-4 flex flex-col justify-between gap-4">
+          <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-rose-500 rounded-2xl p-5 shadow-sm flex-1 flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-rose-600 dark:text-rose-400">Lotes Vendidos</span>
+              <CheckCircle2 className="w-5 h-5 text-rose-500" />
+            </div>
+            <div className="text-3xl font-mono-num font-extrabold text-[#0F172A] dark:text-[#F8FAFC] mt-2">
+              {formatearEnteroBolivia(ind.lotesVendidos)} lotes
+            </div>
+            <div className="text-xs font-mono-num text-[#64748B] dark:text-[#94A3B8] mt-2 space-y-1">
+              <div className="font-bold text-rose-600 dark:text-rose-400">
                 Peso vendido: {formatearNumeroBolivia(ind.pesoTotalVendidoKg, 2)} kg
               </div>
-              <div className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">
-                {formatearEnteroBolivia(ind.totalSacosVendidos)} sacos entregados
-              </div>
+              <div>{formatearEnteroBolivia(ind.totalSacosVendidos)} sacos entregados · {ind.totalVentasOperaciones || 0} ventas</div>
             </div>
+          </div>
 
-            <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-violet-500 rounded-2xl p-4 shadow-sm transition-colors">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase text-violet-600 dark:text-violet-400">
-                  Sacos en Almacén
-                </span>
-                <Package className="w-5 h-5 text-violet-500" />
-              </div>
-              <div className="text-2xl font-mono-num font-extrabold text-[#0F172A] dark:text-[#F8FAFC] mt-1.5">
-                {formatearEnteroBolivia(ind.totalSacosDisponibles)} u.
-              </div>
-              <div className="text-xs font-mono-num font-bold text-violet-600 dark:text-violet-400 mt-1">
-                Peso disponible: {formatearNumeroBolivia(ind.pesoTotalDisponibleKg, 2)} kg
-              </div>
-              <div className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">
-                {ind.totalComprasOperaciones || 10} compras · {ind.totalVentasOperaciones || 2} ventas
-              </div>
+          <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-cyan-500 rounded-2xl p-5 shadow-sm flex-1 flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400">Promedio por Lote en Almacén</span>
+              <Package className="w-5 h-5 text-cyan-500" />
+            </div>
+            <div className="text-2xl font-mono-num font-extrabold text-[#0F172A] dark:text-[#F8FAFC] mt-2">
+              {formatearMonedaBob(valorizacionStock.valorPromedioPorLoteBob)}
+            </div>
+            <div className="text-xs font-mono-num text-[#64748B] dark:text-[#94A3B8] mt-2">
+              {formatearMonedaUsd(valorizacionStock.valorPromedioPorLoteUsd)} / lote · Valor bruto {formatearMonedaBob(valorizacionStock.valorBrutoTotalBob)}
             </div>
           </div>
         </div>

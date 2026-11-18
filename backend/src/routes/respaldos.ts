@@ -89,6 +89,48 @@ export async function restaurarDesdeArchivo(archivo: string) {
 
 export async function respaldosRoutes(app: FastifyInstance) {
   const soloAdmin = { preHandler: authorizeRoles('ADMINISTRADOR') };
+  const CONFIG_FILE = path.join(CARPETA, 'config_programacion.json');
+
+  const leerConfig = () => {
+    asegurarCarpeta();
+    if (!fs.existsSync(CONFIG_FILE)) {
+      return { activo: true, frecuencia: 'MENSUAL', hora: '23:30', actualizadoEn: new Date().toISOString() };
+    }
+    try {
+      return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+    } catch {
+      return { activo: true, frecuencia: 'MENSUAL', hora: '23:30', actualizadoEn: new Date().toISOString() };
+    }
+  };
+
+  app.get('/api/respaldos/programacion', soloAdmin, async () => {
+    return leerConfig();
+  });
+
+  app.put('/api/respaldos/programacion', soloAdmin, async (request) => {
+    const body = (request.body as any) || {};
+    const config = {
+      activo: Boolean(body.activo),
+      frecuencia: ['MENSUAL', 'QUINCENAL', 'SEMANAL', 'DIARIO'].includes(body.frecuencia)
+        ? body.frecuencia
+        : 'MENSUAL',
+      hora: typeof body.hora === 'string' && /^\d{2}:\d{2}$/.test(body.hora) ? body.hora : '23:30',
+      actualizadoEn: new Date().toISOString(),
+    };
+    asegurarCarpeta();
+    fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf8');
+    await prisma.auditoria.create({
+      data: {
+        usuarioId: request.user.id,
+        usuarioNombre: request.user.nombre,
+        accion: 'CONFIGURAR_RESPALDO_AUTO',
+        entidad: 'Respaldo',
+        registroId: 'programacion',
+        valorNuevo: config as any,
+      },
+    });
+    return config;
+  });
 
   app.get('/api/respaldos', soloAdmin, async () => {
     asegurarCarpeta();
@@ -96,8 +138,14 @@ export async function respaldosRoutes(app: FastifyInstance) {
       .readdirSync(CARPETA)
       .filter((n) => NOMBRE_VALIDO.test(n))
       .map((nombre) => {
-        const st = fs.statSync(path.join(CARPETA, nombre));
-        return { nombre, tamano: st.size, creadoEn: st.mtime.toISOString() };
+        const ruta = path.join(CARPETA, nombre);
+        const st = fs.statSync(ruta);
+        let resumen: Record<string, number> | undefined;
+        try {
+          const parsed = JSON.parse(fs.readFileSync(ruta, 'utf8'));
+          resumen = parsed.resumen;
+        } catch {}
+        return { nombre, tamano: st.size, creadoEn: st.mtime.toISOString(), resumen };
       })
       .sort((a, b) => b.creadoEn.localeCompare(a.creadoEn));
     return { respaldos: archivos, carpeta: CARPETA };

@@ -187,5 +187,75 @@ export async function authRoutes(app: FastifyInstance) {
       return reply.status(201).send({ usuario: nuevo });
     }
   );
+
+  app.put(
+    '/api/usuarios/:id',
+    { preHandler: [authorizeRoles('ADMINISTRADOR')] },
+    async (request, reply) => {
+      const { id } = request.params as { id: string };
+      const updateSchema = z.object({
+        nombre: z.string().min(3, 'El nombre debe tener al menos 3 caracteres').optional(),
+        email: z.string().email('Correo electrónico inválido').optional(),
+        rol: z.enum(['ADMINISTRADOR', 'ALMACENERO', 'VENDEDOR', 'LABORATORIO', 'CONSULTA']).optional(),
+        estado: z.enum(['ACTIVO', 'INACTIVO']).optional(),
+        password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres').optional().or(z.literal('')),
+      });
+
+      const parsed = updateSchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply.status(400).send({
+          error: 'Validación fallida',
+          mensaje: parsed.error.issues[0]?.message || 'Datos inválidos.',
+        });
+      }
+
+      const actual = await prisma.usuario.findUnique({ where: { id } });
+      if (!actual) {
+        return reply.status(404).send({ error: 'No encontrado', mensaje: 'Usuario no encontrado.' });
+      }
+
+      if (id === request.user.id && (parsed.data.estado === 'INACTIVO' || (parsed.data.rol && parsed.data.rol !== 'ADMINISTRADOR'))) {
+        return reply.status(400).send({
+          error: 'Operación no permitida',
+          mensaje: 'No puedes desactivar ni cambiar el rol de tu propia sesión de administrador.',
+        });
+      }
+
+      const dataUpdate: any = {};
+      if (parsed.data.nombre) dataUpdate.nombre = parsed.data.nombre;
+      if (parsed.data.email) dataUpdate.email = parsed.data.email;
+      if (parsed.data.rol) dataUpdate.rol = parsed.data.rol;
+      if (parsed.data.estado) dataUpdate.estado = parsed.data.estado;
+      if (parsed.data.password && parsed.data.password.trim().length >= 6) {
+        dataUpdate.hashPassword = await bcrypt.hash(parsed.data.password, 10);
+      }
+
+      const actualizado = await prisma.usuario.update({
+        where: { id },
+        data: dataUpdate,
+        select: {
+          id: true,
+          nombre: true,
+          email: true,
+          username: true,
+          rol: true,
+          estado: true,
+          createdAt: true,
+        },
+      });
+
+      await registrarAuditoria({
+        usuarioId: request.user.id,
+        usuarioNombre: request.user.nombre,
+        accion: 'ACTUALIZAR_USUARIO',
+        entidad: 'Usuario',
+        registroId: actualizado.id,
+        valorAnterior: { nombre: actual.nombre, email: actual.email, rol: actual.rol, estado: actual.estado },
+        valorNuevo: actualizado,
+      });
+
+      return reply.send({ usuario: actualizado });
+    }
+  );
 }
 

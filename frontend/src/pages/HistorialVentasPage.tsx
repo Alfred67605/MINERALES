@@ -10,19 +10,31 @@ import {
   X,
   CheckCircle2,
 } from 'lucide-react';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { apiFetch } from '../utils/api';
 import {
+  COTIZACIONES_OFICIALES_FALLBACK,
+  CotizacionReferencia,
+  TIPO_CAMBIO_OFICIAL_BOB,
+  calcularValorizacionGrupo,
+  calcularValorizacionLote,
   formatearEnteroBolivia,
   formatearFechaBolivia,
+  formatearMonedaBob,
+  formatearMonedaUsd,
   formatearNumeroBolivia,
 } from '../utils/calculations';
+import {
+  exportarHistorialVentasExcel,
+  exportarHistorialVentasPDF,
+  exportarLiquidacionVentaExcel,
+  exportarLiquidacionVentaPDF,
+} from '../utils/reportExporter';
 import { EmptyStateMineralSvg } from '../components/MineralGraphics';
 
 export function HistorialVentasPage() {
   const [ventas, setVentas] = useState<any[]>([]);
   const [compradores, setCompradores] = useState<any[]>([]);
+  const [cotizaciones, setCotizaciones] = useState<CotizacionReferencia[]>(COTIZACIONES_OFICIALES_FALLBACK);
   const [cargando, setCargando] = useState(true);
 
   // Filtros
@@ -45,13 +57,17 @@ export function HistorialVentasPage() {
       if (desde) params.set('desde', desde);
       if (hasta) params.set('hasta', hasta);
 
-      const [resVentas, resComp] = await Promise.all([
+      const [resVentas, resComp, resCot] = await Promise.all([
         apiFetch<{ ventas: any[] }>(`/api/ventas?${params.toString()}`),
         apiFetch<{ compradores: any[] }>('/api/compradores'),
+        apiFetch<{ cotizaciones: CotizacionReferencia[] }>('/api/cotizaciones').catch(() => ({
+          cotizaciones: COTIZACIONES_OFICIALES_FALLBACK,
+        })),
       ]);
 
       setVentas(resVentas.ventas);
       setCompradores(resComp.compradores);
+      if (resCot.cotizaciones?.length) setCotizaciones(resCot.cotizaciones);
     } finally {
       setCargando(false);
     }
@@ -69,196 +85,19 @@ export function HistorialVentasPage() {
     setHasta('');
   };
 
-  // Exportar lista general o venta individual a CSV compatible con Excel
   const exportarCSV = (ventaEspecifica?: any) => {
-    let filas: string[][] = [];
-    let nombreArchivo = 'mineralflow_historial_ventas.csv';
-
     if (ventaEspecifica) {
-      nombreArchivo = `liquidacion_${ventaEspecifica.numeroVenta}.csv`;
-      filas = [
-        ['LIQUIDACION DE VENTA MINERA — MINERALFLOW BOLIVIA'],
-        ['Nro Venta', ventaEspecifica.numeroVenta],
-        ['Fecha', formatearFechaBolivia(ventaEspecifica.fecha)],
-        ['Comprador', ventaEspecifica.compradorNombre],
-        ['NIT / Identificacion', ventaEspecifica.compradorNit || '-'],
-        ['Responsable', ventaEspecifica.usuarioNombre],
-        ['Total Lotes', String(ventaEspecifica.totalLotes)],
-        ['Total Sacos', String(ventaEspecifica.totalSacos)],
-        ['Peso Total (kg)', String(ventaEspecifica.pesoTotalKg)],
-        [],
-        ['PROMEDIOS PONDERADOS DE LEYES'],
-        ['Simbolo', 'Ley Mineral', 'Promedio Ponderado', 'Unidad', 'Lotes Incluidos'],
-        ...ventaEspecifica.resumenLeyes.map((rl: any) => [
-          rl.simbolo,
-          rl.nombreLey,
-          rl.leyPromedioStr,
-          rl.unidadMedida,
-          String(rl.lotesIncluidos),
-        ]),
-        [],
-        ['DETALLE HISTORICO DE LOTES VENDIDOS'],
-        ['Nro Lote', 'Fecha Compra', 'Proveedor Original', 'Mina Origen', 'Mineral', 'Sacos', 'Peso', 'Unidad', 'Leyes Individuales'],
-        ...ventaEspecifica.detalles.map((d: any) => [
-          d.numeroLote,
-          formatearFechaBolivia(d.fechaCompra),
-          d.proveedorNombre,
-          d.minaOrigen || '-',
-          d.tipoMineral,
-          String(d.sacosRegistrados),
-          d.pesoRegistradoStr,
-          d.unidadPesoRegistrada,
-          (d.leyesSnapshot || [])
-            .map((l: any) => `${l.simbolo}: ${l.valorStr} ${l.unidadMedida}`)
-            .join(' | '),
-        ]),
-      ];
+      exportarLiquidacionVentaExcel(ventaEspecifica, cotizaciones);
     } else {
-      filas = [
-        [
-          'Nro Venta',
-          'Fecha',
-          'Comprador',
-          'NIT',
-          'Cantidad Lotes',
-          'Total Sacos',
-          'Peso Total (kg)',
-          'Leyes Promedio',
-          'Usuario Responsable',
-        ],
-        ...ventas.map((v) => [
-          v.numeroVenta,
-          formatearFechaBolivia(v.fecha),
-          v.compradorNombre,
-          v.compradorNit || '-',
-          String(v.totalLotes),
-          String(v.totalSacos),
-          v.pesoTotalKgStr,
-          v.resumenLeyes
-            .map((r: any) => `${r.simbolo}: ${r.leyPromedioStr} ${r.unidadMedida}`)
-            .join(' | '),
-          v.usuarioNombre,
-        ]),
-      ];
+      exportarHistorialVentasExcel(ventas, cotizaciones);
     }
-
-    const csvContent =
-      '\uFEFF' +
-      filas
-        .map((row) =>
-          row.map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(';')
-        )
-        .join('\r\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = nombreArchivo;
-    a.click();
-    URL.revokeObjectURL(url);
   };
 
-  // Exportar a PDF real con jsPDF y autoTable
   const exportarPDF = (ventaEspecifica?: any) => {
-    const doc = new jsPDF({ orientation: 'landscape' });
-
     if (ventaEspecifica) {
-      doc.setFontSize(16);
-      doc.text(
-        `MineralFlow Bolivia — Liquidación de Venta ${ventaEspecifica.numeroVenta}`,
-        14,
-        16
-      );
-      doc.setFontSize(10);
-      doc.text(
-        `Fecha: ${formatearFechaBolivia(ventaEspecifica.fecha)}   |   Comprador: ${ventaEspecifica.compradorNombre
-        } (${ventaEspecifica.compradorNit || 'S/NIT'})   |   Responsable: ${ventaEspecifica.usuarioNombre
-        }`,
-        14,
-        24
-      );
-      doc.text(
-        `Resumen: ${ventaEspecifica.totalLotes} Lotes   |   ${formatearEnteroBolivia(
-          ventaEspecifica.totalSacos
-        )} Sacos   |   Peso Neto Total: ${formatearNumeroBolivia(
-          ventaEspecifica.pesoTotalKg,
-          2
-        )} kg`,
-        14,
-        30
-      );
-
-      const leyesTexto = ventaEspecifica.resumenLeyes
-        .map((r: any) => `${r.nombreLey}: ${r.leyPromedioStr} ${r.unidadMedida}`)
-        .join('   |   ');
-      doc.text(`Leyes Promedio Ponderadas: ${leyesTexto}`, 14, 36);
-
-      autoTable(doc, {
-        startY: 42,
-        head: [
-          [
-            'N.º Lote',
-            'Fecha Compra',
-            'Proveedor Original',
-            'Mina Origen',
-            'Mineral',
-            'Sacos',
-            'Peso',
-            'Leyes Individuales',
-          ],
-        ],
-        body: ventaEspecifica.detalles.map((d: any) => [
-          d.numeroLote,
-          formatearFechaBolivia(d.fechaCompra),
-          d.proveedorNombre,
-          d.minaOrigen || '-',
-          d.tipoMineral,
-          String(d.sacosRegistrados),
-          `${formatearNumeroBolivia(d.pesoRegistrado, 2)} ${d.unidadPesoRegistrada}`,
-          (d.leyesSnapshot || [])
-            .map((l: any) => `${l.simbolo}: ${l.valorStr} ${l.unidadMedida}`)
-            .join(', '),
-        ]),
-        headStyles: { fillColor: [30, 77, 59] },
-        styles: { fontSize: 8 },
-      });
-
-      doc.save(`Reporte_${ventaEspecifica.numeroVenta}.pdf`);
+      exportarLiquidacionVentaPDF(ventaEspecifica, cotizaciones);
     } else {
-      doc.setFontSize(15);
-      doc.text('MineralFlow Bolivia — Reporte General de Ventas de Minerales', 14, 16);
-      autoTable(doc, {
-        startY: 24,
-        head: [
-          [
-            'N.º Venta',
-            'Fecha',
-            'Comprador',
-            'Lotes',
-            'Sacos',
-            'Peso Total (kg)',
-            'Leyes Promedio Ponderadas',
-            'Responsable',
-          ],
-        ],
-        body: ventas.map((v) => [
-          v.numeroVenta,
-          formatearFechaBolivia(v.fecha),
-          v.compradorNombre,
-          String(v.totalLotes),
-          String(v.totalSacos),
-          `${formatearNumeroBolivia(v.pesoTotalKg, 2)} kg`,
-          v.resumenLeyes
-            .map((r: any) => `${r.simbolo}: ${r.leyPromedioStr} ${r.unidadMedida}`)
-            .join(', '),
-          v.usuarioNombre,
-        ]),
-        headStyles: { fillColor: [30, 77, 59] },
-        styles: { fontSize: 8 },
-      });
-
-      doc.save('MineralFlow_Historial_Ventas.pdf');
+      exportarHistorialVentasPDF(ventas, cotizaciones);
     }
   };
 
@@ -396,13 +235,16 @@ export function HistorialVentasPage() {
                   <th className="py-3 px-3 text-right">Cant. Lotes</th>
                   <th className="py-3 px-3 text-right">Total Sacos</th>
                   <th className="py-3 px-3 text-right">Peso Total</th>
+                  <th className="py-3 px-3 text-right">Recibido (Bs)</th>
                   <th className="py-3 px-3">Ley Promedio Ponderada</th>
-                  <th className="py-3 px-3">Usuario Responsable</th>
+                  <th className="py-3 px-3">Responsable</th>
                   <th className="py-3 px-4 text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200/70 dark:divide-[#1A364E]/70 dark:divide-[#1A364E] text-xs">
-                {ventas.map((v) => (
+                {ventas.map((v) => {
+                  const valV = calcularValorizacionGrupo(v.detalles || [], cotizaciones, false, TIPO_CAMBIO_OFICIAL_BOB);
+                  return (
                   <tr key={v.id} className="hover:bg-slate-100 dark:hover:bg-[#0F2232]/50 transition">
                     <td className="py-3 px-4 font-mono-num font-bold text-amber-600 dark:text-[#06B6D4]">
                       {v.numeroVenta}
@@ -419,9 +261,20 @@ export function HistorialVentasPage() {
                     </td>
                     <td className="py-3 px-3 text-right font-mono-num font-semibold text-slate-900 dark:text-[#F8FAFC]">
                       {formatearEnteroBolivia(v.totalSacos)}
+                      <span className="block text-[10px] font-normal text-slate-500 dark:text-[#94A3B8]">
+                        {formatearNumeroBolivia(valV.pesoPromedioPorSacoKg, 1)} kg/saco
+                      </span>
                     </td>
                     <td className="py-3 px-3 text-right font-mono-num font-bold text-[#0891B2] dark:text-[#22D3EE]">
                       {formatearNumeroBolivia(v.pesoTotalKg, 2)} kg
+                    </td>
+                    <td className="py-3 px-3 text-right font-mono-num">
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400 block">
+                        {formatearMonedaBob(valV.valorNetoTotalBob)}
+                      </span>
+                      <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold block">
+                        {formatearMonedaBob(valV.valorPromedioPorSacoBob)} / saco
+                      </span>
                     </td>
                     <td className="py-3 px-3">
                       <div className="flex flex-wrap gap-1">
@@ -450,7 +303,8 @@ export function HistorialVentasPage() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -545,6 +399,41 @@ export function HistorialVentasPage() {
               </div>
 
               {/* 2. Resumen de Totales y Promedios Ponderados */}
+              {(() => {
+                const valSel = calcularValorizacionGrupo(ventaSeleccionada.detalles || [], cotizaciones, false, TIPO_CAMBIO_OFICIAL_BOB);
+                return (
+                <div className="space-y-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-500/40 rounded-xl p-3.5 sm:col-span-2">
+                    <span className="text-emerald-700 dark:text-emerald-300 font-bold block">Total Líquido Recibido (Bs / $US)</span>
+                    <div className="flex items-baseline gap-2.5 mt-1">
+                      <span className="text-2xl font-mono-num font-extrabold text-emerald-700 dark:text-emerald-300">
+                        {formatearMonedaBob(valSel.valorNetoTotalBob)}
+                      </span>
+                      <span className="text-xs font-mono-num text-emerald-600 dark:text-emerald-400">
+                        ({formatearMonedaUsd(valSel.valorNetoTotalUsd)})
+                      </span>
+                    </div>
+                  </div>
+                  <div className="bg-amber-50 dark:bg-amber-950/25 border border-amber-500/40 rounded-xl p-3.5">
+                    <span className="text-amber-700 dark:text-amber-300 font-bold block">Valor / Saco</span>
+                    <span className="text-lg font-mono-num font-extrabold text-amber-700 dark:text-amber-300">
+                      {formatearMonedaBob(valSel.valorPromedioPorSacoBob)}
+                    </span>
+                    <span className="block text-[10px] font-mono-num text-slate-600 dark:text-[#94A3B8]">
+                      {formatearNumeroBolivia(valSel.pesoPromedioPorSacoKg, 1)} kg/saco
+                    </span>
+                  </div>
+                  <div className="bg-slate-100 dark:bg-[#0F2232] border border-slate-200 dark:border-[#1A364E] rounded-xl p-3.5">
+                    <span className="text-slate-600 dark:text-[#94A3B8] font-bold block">Regalía Ley 535</span>
+                    <span className="text-base font-mono-num font-bold text-rose-600 dark:text-rose-400">
+                      - {formatearMonedaBob(valSel.regaliaTotalBob)}
+                    </span>
+                  </div>
+                </div>
+                </div>
+                );
+              })()}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                 <div className="lg:col-span-5 grid grid-cols-3 gap-2.5">
                   <div className="bg-slate-100 dark:bg-[#0F2232] border border-slate-200 dark:border-[#1A364E] rounded-xl p-3.5">
@@ -603,14 +492,17 @@ export function HistorialVentasPage() {
                         <th className="py-2.5 px-3">Fecha Compra</th>
                         <th className="py-2.5 px-3">Proveedor Original / Mina</th>
                         <th className="py-2.5 px-3">Mineral</th>
-                        <th className="py-2.5 px-3 text-right">Sacos</th>
+                        <th className="py-2.5 px-3 text-right">Sacos (kg/u)</th>
                         <th className="py-2.5 px-3 text-right">Peso</th>
                         <th className="py-2.5 px-3">Leyes Individuales (Snapshot)</th>
+                        <th className="py-2.5 px-3 text-right">Valor Lote / Saco (Bs)</th>
                         <th className="py-2.5 px-3 text-center">Estado</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200/70 dark:divide-[#1A364E]/70">
-                      {ventaSeleccionada.detalles.map((det: any) => (
+                      {ventaSeleccionada.detalles.map((det: any) => {
+                        const vlDet = calcularValorizacionLote(det, cotizaciones, false, TIPO_CAMBIO_OFICIAL_BOB);
+                        return (
                         <tr key={det.id} className="hover:bg-slate-100 dark:hover:bg-[#0F2232]/60">
                           <td className="py-2.5 px-3 font-mono-num font-bold text-slate-900 dark:text-[#F8FAFC]">
                             {det.numeroLote}
@@ -627,6 +519,9 @@ export function HistorialVentasPage() {
                           <td className="py-2.5 px-3">{det.tipoMineral}</td>
                           <td className="py-2.5 px-3 text-right font-mono-num font-semibold">
                             {det.sacosRegistrados}
+                            <span className="block text-[10px] font-normal text-slate-500 dark:text-[#94A3B8]">
+                              {formatearNumeroBolivia(vlDet.pesoPorSacoKg, 1)} kg/u
+                            </span>
                           </td>
                           <td className="py-2.5 px-3 text-right font-mono-num font-bold">
                             {formatearNumeroBolivia(det.pesoRegistrado, 2)}{' '}
@@ -644,13 +539,22 @@ export function HistorialVentasPage() {
                               ))}
                             </div>
                           </td>
+                          <td className="py-2.5 px-3 text-right font-mono-num">
+                            <span className="font-bold text-emerald-600 dark:text-emerald-400 block">
+                              {formatearMonedaBob(vlDet.valorNetoBob)}
+                            </span>
+                            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold block">
+                              {formatearMonedaBob(vlDet.valorPorSacoBob)} / saco
+                            </span>
+                          </td>
                           <td className="py-2.5 px-3 text-center">
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 dark:bg-rose-950/30 text-amber-600 dark:text-amber-400">
                               VENDIDO
                             </span>
                           </td>
                         </tr>
-                      ))}
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

@@ -1,7 +1,7 @@
 # MINERALES — MineralFlow (Bolivia)
 ### Plataforma Integral de Gestión de Compras, Almacén, Laboratorio y Ventas de Lotes Mineros
 
-Sistema web comercial de alta precisión para comercializadoras y empresas mineras en Bolivia. Permite el control riguroso de compras de lotes mineros, pesaje (bruto, tara, neto y seco ISO 10251), gestión de almacén con visualización 3D y 2D, agrupación masiva de lotes con selección por rango (`Shift + Clic`), cálculo de leyes promedio ponderadas en tiempo real, liquidación de ventas bajo cotizaciones oficiales SENARECOM / mercado en vivo LME / fijación manual, control normativo de formularios M-02 / M-03 y bitácora inmutable de auditoría.
+Sistema web comercial de alta precisión para comercializadoras y empresas mineras en Bolivia. Permite el control riguroso de compras de lotes mineros, pesaje (bruto, tara, neto y seco ISO 10251), gestión detallada de almacén por zonas y sacos (`kg/saco`), agrupación masiva de lotes con selección por rango (`Shift + Clic`), cálculo de leyes promedio ponderadas y valorización en Bolivianos (`Bs` y `Bs/saco`) en tiempo real, reportes estadísticos en PDF/Excel, copias de seguridad avanzadas, administración de perfiles y bitácora inmutable de auditoría.
 
 ---
 
@@ -10,11 +10,10 @@ Sistema web comercial de alta precisión para comercializadoras y empresas miner
 - **Frontend:**
   - React 19 + TypeScript + Vite
   - Tailwind CSS v4 (con soporte dual Modo Oscuro Azul Cian Tecnológico y Modo Claro)
-  - Three.js (escenas 3D interactivas de almacén y lotes con fallback automático a 2D)
   - Motion for React (microinteracciones y transiciones fluidas)
-  - Recharts (gráficos analíticos de compras, ventas y stock)
+  - Recharts (gráficos analíticos de compras, ventas, stock y estadísticas por mineral/proveedor)
+  - jsPDF & jsPDF-AutoTable (reportes PDF corporativos con liquidación en Bs/$US y detalle por saco)
   - Lucide Icons (iconografía semántica por mineral y proceso)
-  - HyperFrames (presentación ejecutiva interactiva en 5 escenas)
 
 - **Backend:**
   - Node.js + TypeScript
@@ -167,9 +166,17 @@ El formulario de inicio de sesión ya viene precargado con el usuario administra
 
 ---
 
-## 💾 Respaldo de Datos
+## 📊 Reportes, Estadísticas y Valorización en Bolivianos (Bs)
 
-En el menú **Administración → Respaldo de Datos** (solo administrador) puedes crear un respaldo completo de la base, descargarlo, cargarlo en otra PC y restaurarlo. Los archivos se guardan en ackups/respaldos/.
+- En **Inicio / Resumen**, **Mi Almacén**, **Vender Lotes** y **Ventas Realizadas** el sistema calcula automáticamente el valor estimado neto en **Bolivianos (`Bs`)** y **Dólares (`$US`)** aplicando las cotizaciones oficiales SENARECOM (o precios en vivo/manuales), descontando la Regalía Minera (Ley 535) y detallando el **peso promedio por saco (`kg/saco`)** y el **valor por saco (`Bs/saco`)**.
+- En el módulo **Reportes y Estadísticas** (`/reportes`) puedes filtrar por fecha, mineral, proveedor o estado del lote, analizar estadísticas detalladas con gráficos por mineral, proveedor, ventas y lotes/sacos, y exportar todo a **PDF** corporativo o **Excel/CSV**.
+
+---
+
+## 💾 Copias de Seguridad (Backups) y Perfiles Avanzados
+
+- En **Administración → Respaldo de Datos** (solo administrador) puedes generar copias completas de la base de datos al instante, configurar la **programación de respaldos automáticos** (mensual, quincenal, semanal o diario con hora personalizada y cálculo de próxima ejecución), descargar archivos, subir copias desde otra PC y restaurar la base de datos con respaldo automático preventivo. Los archivos se guardan en `backups/respaldos/`.
+- En **Administración → Usuarios y Permisos** puedes consultar las tarjetas y matriz de permisos de los **5 perfiles** (`ADMINISTRADOR`, `ALMACENERO`, `VENDEDOR`, `LABORATORIO`, `CONSULTA`), crear cuentas, editar perfiles/contraseñas, activar/desactivar usuarios y exportar el registro de auditoría en PDF.
 
 ---
 
@@ -185,7 +192,7 @@ npm test
 ```
 
 ### 2. Pruebas End-to-End (Playwright)
-Ejecuta la automatización en un navegador Google Chrome real verificando login, gráficos 3D, selección con `Shift + Clic`, cambio a modo 2D, exportación y responsive:
+Ejecuta la automatización en un navegador Google Chrome real verificando login, dashboard, almacén por zonas, laboratorio, trazabilidad, copias de seguridad, perfiles, reportes y estadísticas, venta de 40 lotes con cálculo en `Bs` y `Bs/saco`, cotizaciones y responsive:
 ```bash
 cd frontend
 npx playwright test

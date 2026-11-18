@@ -14,20 +14,27 @@ import {
   ArrowRightLeft,
   SlidersHorizontal,
   Download,
+  FileDown,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { apiFetch } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import {
+  COTIZACIONES_OFICIALES_FALLBACK,
+  CotizacionReferencia,
   LoteItem,
+  TIPO_CAMBIO_OFICIAL_BOB,
   calcularResumenEnTiempoReal,
+  calcularValorizacionGrupo,
+  calcularValorizacionLote,
   formatearEnteroBolivia,
   formatearFechaBolivia,
+  formatearMonedaBob,
   formatearNumeroBolivia,
   getMineralBadgeClass,
 } from '../utils/calculations';
+import { exportarInventarioAlmacenPDF } from '../utils/reportExporter';
 import { EmptyStateMineralSvg } from '../components/MineralGraphics';
-import { WarehouseInventory3DScene } from '../components/three/MineralThreeScenes';
 
 export function AlmacenPage() {
   const [searchParams] = useSearchParams();
@@ -40,6 +47,8 @@ export function AlmacenPage() {
   const [proveedores, setProveedores] = useState<any[]>([]);
   const [ubicaciones, setUbicaciones] = useState<any[]>([]);
   const [movimientosKardex, setMovimientosKardex] = useState<any[]>([]);
+  const [cotizaciones, setCotizaciones] = useState<CotizacionReferencia[]>(COTIZACIONES_OFICIALES_FALLBACK);
+  const [tipoCambio, setTipoCambio] = useState<number>(TIPO_CAMBIO_OFICIAL_BOB);
   const [cargando, setCargando] = useState(true);
 
   // Filtros
@@ -77,17 +86,22 @@ export function AlmacenPage() {
       params.set('sortBy', sortBy);
       params.set('sortOrder', sortOrder);
 
-      const [resLotes, resProv, resUbi, resKardex] = await Promise.all([
+      const [resLotes, resProv, resUbi, resKardex, resCot] = await Promise.all([
         apiFetch<{ lotes: LoteItem[] }>(`/api/lotes?${params.toString()}`),
         apiFetch<{ proveedores: any[] }>('/api/proveedores'),
         apiFetch<{ ubicaciones: any[] }>('/api/ubicaciones-almacen'),
         apiFetch<{ movimientos: any[] }>('/api/kardex?limit=150'),
+        apiFetch<{ cotizaciones: CotizacionReferencia[]; tipoCambioBobUsd?: number }>('/api/cotizaciones').catch(
+          () => ({ cotizaciones: COTIZACIONES_OFICIALES_FALLBACK, tipoCambioBobUsd: TIPO_CAMBIO_OFICIAL_BOB })
+        ),
       ]);
 
       setLotes(resLotes.lotes);
       setProveedores(resProv.proveedores);
       setUbicaciones(resUbi.ubicaciones);
       setMovimientosKardex(resKardex.movimientos);
+      if (resCot.cotizaciones?.length) setCotizaciones(resCot.cotizaciones);
+      if (resCot.tipoCambioBobUsd) setTipoCambio(resCot.tipoCambioBobUsd);
       setPagina(1);
     } finally {
       setCargando(false);
@@ -101,6 +115,27 @@ export function AlmacenPage() {
   const resumenInventario = useMemo(() => {
     return calcularResumenEnTiempoReal(lotes, 2, false);
   }, [lotes]);
+
+  const valorizacionInventario = useMemo(() => {
+    return calcularValorizacionGrupo(lotes, cotizaciones, false, tipoCambio);
+  }, [lotes, cotizaciones, tipoCambio]);
+
+  const resumenPorZona = useMemo(() => {
+    const mapa = new Map<string, { id: string; codigo: string; nombre: string; lotes: LoteItem[] }>();
+    for (const u of ubicaciones) {
+      mapa.set(u.codigo, { id: u.id, codigo: u.codigo, nombre: u.nombre, lotes: [] });
+    }
+    for (const l of lotes) {
+      const code = l.ubicacionCodigo || 'ZONA-A1';
+      const entry = mapa.get(code) || { id: l.ubicacionId || '', codigo: code, nombre: l.ubicacionNombre || code, lotes: [] };
+      entry.lotes.push(l);
+      mapa.set(code, entry);
+    }
+    return Array.from(mapa.values()).map((z) => ({
+      ...z,
+      val: calcularValorizacionGrupo(z.lotes, cotizaciones, false, tipoCambio),
+    }));
+  }, [lotes, ubicaciones, cotizaciones, tipoCambio]);
 
   const totalPaginas = Math.max(1, Math.ceil(lotes.length / porPagina));
   const lotesPaginados = useMemo(() => {
@@ -130,21 +165,27 @@ export function AlmacenPage() {
 
   const exportarCSV = () => {
     if (lotes.length === 0) return;
-    const encabezados = ['Numero Lote', 'Fecha', 'Proveedor', 'Mina', 'Sacos', 'Peso Neto (kg)', 'Peso Seco (kg)', 'Mineral', 'Leyes', 'Estado', 'Ubicacion'];
-    const filas = lotes.map((l) => [
-      l.numeroLote,
-      l.fechaCompra.slice(0, 10),
-      `"${l.proveedorNombre.replace(/"/g, '""')}"`,
-      `"${(l.minaOrigen || '').replace(/"/g, '""')}"`,
-      l.cantidadSacos,
-      l.pesoNeto,
-      l.pesoSeco ?? l.pesoNeto,
-      `"${l.tipoMineral}"`,
-      `"${l.leyes.map((ley) => `${ley.simbolo}:${ley.valorStr}${ley.unidadMedida}`).join('; ')}"`,
-      l.estado,
-      `"${l.ubicacionNombre || ''}"`,
-    ]);
-    const contenido = [encabezados.join(','), ...filas.map((f) => f.join(','))].join('\n');
+    const encabezados = ['Numero Lote', 'Fecha', 'Proveedor', 'Mina', 'Sacos', 'kg/Saco', 'Peso Neto (kg)', 'Peso Seco (kg)', 'Mineral', 'Leyes', 'Valor Lote (Bs)', 'Bs/Saco', 'Estado', 'Ubicacion'];
+    const filas = lotes.map((l) => {
+      const vl = calcularValorizacionLote(l, cotizaciones, false, tipoCambio);
+      return [
+        l.numeroLote,
+        l.fechaCompra.slice(0, 10),
+        `"${l.proveedorNombre.replace(/"/g, '""')}"`,
+        `"${(l.minaOrigen || '').replace(/"/g, '""')}"`,
+        l.cantidadSacos,
+        vl.pesoPorSacoKg.toFixed(2),
+        l.pesoNeto,
+        l.pesoSeco ?? l.pesoNeto,
+        `"${l.tipoMineral}"`,
+        `"${l.leyes.map((ley) => `${ley.simbolo}:${ley.valorStr}${ley.unidadMedida}`).join('; ')}"`,
+        vl.valorNetoBob.toFixed(2),
+        vl.valorPorSacoBob.toFixed(2),
+        l.estado,
+        `"${l.ubicacionNombre || ''}"`,
+      ];
+    });
+    const contenido = '\uFEFF' + [encabezados.join(';'), ...filas.map((f) => f.join(';'))].join('\r\n');
     const blob = new Blob([contenido], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -206,6 +247,16 @@ export function AlmacenPage() {
 
             <button
               type="button"
+              onClick={() => exportarInventarioAlmacenPDF(lotes, cotizaciones, `INVENTARIO (${estadoFiltro})`)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition shadow-xs"
+              title="Descargar reporte completo en PDF"
+            >
+              <FileDown className="w-4 h-4" />
+              <span>Descargar PDF</span>
+            </button>
+
+            <button
+              type="button"
               onClick={exportarCSV}
               className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-500/15 hover:bg-amber-100 dark:hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 border border-amber-400/50 text-xs font-bold transition shadow-xs"
               title="Descargar lista en archivo Excel/CSV"
@@ -246,6 +297,9 @@ export function AlmacenPage() {
               <span className="text-2xl font-mono-num font-bold text-[#0F172A] dark:text-[#F8FAFC]">
                 {formatearEnteroBolivia(resumenInventario.totalSacos)} u.
               </span>
+              <span className="text-xs text-[#64748B] dark:text-[#94A3B8] block font-mono-num">
+                Promedio: {formatearNumeroBolivia(valorizacionInventario.pesoPromedioPorSacoKg, 1)} kg/saco
+              </span>
             </div>
             <Package className="w-7 h-7 text-violet-500" />
           </div>
@@ -266,19 +320,15 @@ export function AlmacenPage() {
           </div>
 
           <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-500/40 rounded-xl p-3.5">
-            <span className="text-xs font-bold uppercase text-emerald-700 dark:text-emerald-300 block mb-1.5">
-              Leyes Promedio del Stock
+            <span className="text-xs font-bold uppercase text-emerald-700 dark:text-emerald-300 block">
+              Valor Estimado Stock
             </span>
-            <div className="flex flex-wrap gap-1.5">
-              {resumenInventario.promediosLeyes.slice(0, 3).map((pl) => (
-                <span
-                  key={pl.codigoLey}
-                  className={`text-xs font-mono-num font-bold px-2.5 py-0.5 rounded border ${getMineralBadgeClass(pl.simbolo)}`}
-                >
-                  {pl.simbolo}: {formatearNumeroBolivia(pl.leyPromedioRedondeada, 2)} {pl.unidadMedida}
-                </span>
-              ))}
-            </div>
+            <span className="text-xl font-mono-num font-extrabold text-emerald-700 dark:text-emerald-300 block mt-0.5">
+              {formatearMonedaBob(valorizacionInventario.valorNetoTotalBob)}
+            </span>
+            <span className="text-xs font-mono-num text-emerald-700/80 dark:text-emerald-200/80 block">
+              {formatearMonedaBob(valorizacionInventario.valorPromedioPorSacoBob)} / saco
+            </span>
           </div>
         </div>
       </div>
@@ -294,14 +344,43 @@ export function AlmacenPage() {
 
       {tabVista === 'INVENTARIO' ? (
         <>
-          {/* ESCENA B — ALMACÉN VIRTUAL 3D CONCEPTUAL */}
-          <WarehouseInventory3DScene
-            lotes={lotes}
-            onSelectLote={(lote) => {
-              setLoteDetalle(lote);
-              setNuevaUbicacionId(lote.ubicacionId || ubicaciones[0]?.id || '');
-            }}
-          />
+          {/* Distribución detallada por Zona de Almacén (Sacos, Peso y Valor en Bs) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {resumenPorZona.map((z) => {
+              const activa = ubicacionId === z.id;
+              return (
+                <button
+                  key={z.codigo}
+                  type="button"
+                  onClick={() => setUbicacionId(activa ? '' : z.id)}
+                  className={`text-left bg-white dark:bg-[#0A1622] border rounded-2xl p-4 shadow-sm transition ${
+                    activa
+                      ? 'border-cyan-500 ring-2 ring-cyan-500/30'
+                      : 'border-[#CBD5E1] dark:border-[#1A364E] hover:border-cyan-500/60'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="px-2.5 py-0.5 rounded-md bg-violet-500/15 text-violet-700 dark:text-violet-300 font-mono-num font-bold text-xs">
+                      {z.codigo}
+                    </span>
+                    <span className="text-xs font-mono-num font-bold text-cyan-600 dark:text-cyan-400">
+                      {z.val.totalLotes} lotes
+                    </span>
+                  </div>
+                  <div className="text-sm font-bold text-[#0F172A] dark:text-[#F8FAFC] mt-2 truncate">
+                    {z.nombre}
+                  </div>
+                  <div className="flex items-center justify-between text-xs font-mono-num text-[#64748B] dark:text-[#94A3B8] mt-2">
+                    <span>{formatearEnteroBolivia(z.val.totalSacos)} sacos</span>
+                    <span>{formatearNumeroBolivia(z.val.pesoTotalKg, 0)} kg</span>
+                  </div>
+                  <div className="text-sm font-mono-num font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
+                    {formatearMonedaBob(z.val.valorNetoTotalBob)}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
 
           {/* Controles de Búsqueda Instantánea y Filtros Combinados */}
           <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] rounded-2xl p-4 shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end transition-colors">
@@ -488,6 +567,7 @@ export function AlmacenPage() {
                         <th className="py-3 px-3 text-right">Peso Seco (H₂O)</th>
                       )}
                       <th className="py-3 px-3">Leyes</th>
+                      <th className="py-3 px-3 text-right">Valor Lote (Bs)</th>
                       <th className="py-3 px-3 text-center">Estado</th>
                       <th className="py-3 px-4 text-right">Acciones</th>
                     </tr>
@@ -495,6 +575,7 @@ export function AlmacenPage() {
                   <tbody className="divide-y divide-[#CBD5E1]/60 dark:divide-[#1A364E]/60 text-xs">
                     {lotesPaginados.map((lote) => {
                       const esDisponible = lote.estado === 'DISPONIBLE';
+                      const vl = calcularValorizacionLote(lote, cotizaciones, false, tipoCambio);
                       return (
                         <tr key={lote.id} className="hover:bg-[#F8FAFC] dark:hover:bg-[#0F2232]/60 transition">
                           <td className="py-3 px-4 font-mono-num font-bold text-[#0F172A] dark:text-[#F8FAFC]">
@@ -523,6 +604,9 @@ export function AlmacenPage() {
                           )}
                           <td className="py-3 px-3 text-right font-mono-num font-semibold text-[#0F172A] dark:text-[#F8FAFC]">
                             {lote.cantidadSacos}
+                            <span className="block text-[10px] font-normal text-[#64748B] dark:text-[#94A3B8]">
+                              {formatearNumeroBolivia(vl.pesoPorSacoKg, 1)} kg/saco
+                            </span>
                           </td>
                           <td className="py-3 px-3 text-right font-mono-num font-bold text-[#0F172A] dark:text-[#F8FAFC]">
                             {formatearNumeroBolivia(lote.pesoNeto, 2)} {lote.unidadPeso}
@@ -546,6 +630,14 @@ export function AlmacenPage() {
                                 </span>
                               ))}
                             </div>
+                          </td>
+                          <td className="py-3 px-3 text-right font-mono-num">
+                            <span className="font-bold text-emerald-600 dark:text-emerald-400 block">
+                              {formatearMonedaBob(vl.valorNetoBob)}
+                            </span>
+                            <span className="text-[10px] text-[#64748B] dark:text-[#94A3B8] block">
+                              {formatearMonedaBob(vl.valorPorSacoBob)} / saco
+                            </span>
                           </td>
                           <td className="py-3 px-3 text-center">
                             <span

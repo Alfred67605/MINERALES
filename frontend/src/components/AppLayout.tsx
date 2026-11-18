@@ -17,11 +17,11 @@ import {
   GitBranch,
   DatabaseBackup,
   Bell,
-  Box,
   Rows3,
   Sun,
   Moon,
   TrendingUp,
+  BarChart3,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
@@ -30,7 +30,7 @@ import { MineralCrystalSvg } from './MineralGraphics';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { usuario, logout, tienePermiso } = useAuth();
-  const { tema, setTema, densidad, setDensidad, escenas3DActivas, setEscenas3DActivas } = useUIPreferences();
+  const { tema, setTema, densidad, setDensidad } = useUIPreferences();
   const [sidebarAbierto, setSidebarAbierto] = useState(true);
   const [menuMovilAbierto, setMenuMovilAbierto] = useState(false);
   const [busquedaGlobal, setBusquedaGlobal] = useState('');
@@ -93,6 +93,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           icon: History,
           iconColor: 'text-rose-600 dark:text-rose-400',
           descripcion: 'Recibos y descargas en PDF/Excel',
+          visible: true,
+        },
+        {
+          to: '/reportes',
+          label: 'Reportes y Estadísticas',
+          icon: BarChart3,
+          iconColor: 'text-cyan-600 dark:text-cyan-400',
+          descripcion: '',
           visible: true,
         },
         {
@@ -437,21 +445,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <span>{densidad === 'comfortable' ? 'Tabla Cómoda' : 'Tabla Compacta'}</span>
             </button>
 
-            {/* Conmutador rápido 3D */}
-            <button
-              type="button"
-              onClick={() => setEscenas3DActivas(!escenas3DActivas)}
-              className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition ${
-                escenas3DActivas
-                  ? 'bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-400 dark:border-emerald-500/40'
-                  : 'bg-white dark:bg-[#0F2232] text-[#64748B] border-[#CBD5E1] dark:border-[#1A364E]'
-              }`}
-              title="Activar o desactivar vista 3D de almacén"
-            >
-              <Box className="w-4 h-4" />
-              <span>{escenas3DActivas ? 'Vista 3D' : 'Vista 2D'}</span>
-            </button>
-
             {/* Acceso directo a Precios del Día */}
             <button
               type="button"
@@ -514,7 +507,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className="flex-1 p-5 sm:p-8 lg:p-12 max-w-[1560px] w-full mx-auto">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1620px] w-full mx-auto">
           {children}
         </main>
       </div>

@@ -16,19 +16,26 @@ import {
   Layers,
   Calculator,
   Sparkles,
+  Coins,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { apiFetch } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import {
+  COTIZACIONES_OFICIALES_FALLBACK,
+  CotizacionReferencia,
   LoteItem,
+  TIPO_CAMBIO_OFICIAL_BOB,
   calcularResumenEnTiempoReal,
+  calcularValorizacionGrupo,
+  calcularValorizacionLote,
   formatearEnteroBolivia,
   formatearFechaBolivia,
+  formatearMonedaBob,
+  formatearMonedaUsd,
   formatearNumeroBolivia,
 } from '../utils/calculations';
 import { EmptyStateMineralSvg } from '../components/MineralGraphics';
-import { SaleConsolidator3DScene } from '../components/three/MineralThreeScenes';
 
 export function SeleccionVentaPage() {
   const { tienePermiso } = useAuth();
@@ -38,6 +45,8 @@ export function SeleccionVentaPage() {
   const [lotesDisponibles, setLotesDisponibles] = useState<LoteItem[]>([]);
   const [proveedores, setProveedores] = useState<any[]>([]);
   const [compradores, setCompradores] = useState<any[]>([]);
+  const [cotizaciones, setCotizaciones] = useState<CotizacionReferencia[]>(COTIZACIONES_OFICIALES_FALLBACK);
+  const [tipoCambio, setTipoCambio] = useState<number>(TIPO_CAMBIO_OFICIAL_BOB);
   const [cargando, setCargando] = useState(true);
 
   const [seleccionadosSet, setSeleccionadosSet] = useState<Set<string>>(new Set());
@@ -77,15 +86,20 @@ export function SeleccionVentaPage() {
   const cargarLotesDisponibles = async () => {
     setCargando(true);
     try {
-      const [resLotes, resProv, resComp] = await Promise.all([
+      const [resLotes, resProv, resComp, resCot] = await Promise.all([
         apiFetch<{ lotes: LoteItem[] }>('/api/lotes?estado=DISPONIBLE'),
         apiFetch<{ proveedores: any[] }>('/api/proveedores?estado=ACTIVO'),
         apiFetch<{ compradores: any[] }>('/api/compradores?estado=ACTIVO'),
+        apiFetch<{ cotizaciones: CotizacionReferencia[]; tipoCambioBobUsd?: number }>('/api/cotizaciones').catch(
+          () => ({ cotizaciones: COTIZACIONES_OFICIALES_FALLBACK, tipoCambioBobUsd: TIPO_CAMBIO_OFICIAL_BOB })
+        ),
       ]);
 
       setLotesDisponibles(resLotes.lotes);
       setProveedores(resProv.proveedores);
       setCompradores(resComp.compradores);
+      if (resCot.cotizaciones?.length) setCotizaciones(resCot.cotizaciones);
+      if (resCot.tipoCambioBobUsd) setTipoCambio(resCot.tipoCambioBobUsd);
       if (resComp.compradores.length > 0 && !compradorId) {
         setCompradorId(resComp.compradores[0].id);
       }
@@ -177,6 +191,15 @@ export function SeleccionVentaPage() {
       usarPesoSeco
     );
   }, [listaLotesSeleccionados, decimalesFormato, usarPesoSeco]);
+
+  const valorizacionSeleccion = useMemo(() => {
+    return calcularValorizacionGrupo(
+      listaLotesSeleccionados,
+      cotizaciones,
+      usarPesoSeco,
+      tipoCambio
+    );
+  }, [listaLotesSeleccionados, cotizaciones, usarPesoSeco, tipoCambio]);
 
   const manejarClicFila = (
     loteId: string,
@@ -429,11 +452,74 @@ export function SeleccionVentaPage() {
         )}
       </AnimatePresence>
 
-      {/* ESCENA C — AGRUPADOR 3D DE VENTA SINCRONIZADO CON LA SELECCIÓN */}
-      <SaleConsolidator3DScene
-        lotesSeleccionados={listaLotesSeleccionados}
-        resumen={resumenTiempoReal}
-      />
+      {/* Liquidación Estimada en Bolivianos (Bs) y Detalle por Saco */}
+      <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] rounded-2xl p-5 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-[#E2E8F0] dark:border-[#152E42]">
+          <div className="flex items-center gap-2">
+            <Coins className="w-5 h-5 text-emerald-500" />
+            <h2 className="text-base font-bold text-[#0F172A] dark:text-[#F8FAFC]">
+              Cálculo de Venta en Bolivianos (TC: {tipoCambio} Bs/$US)
+            </h2>
+          </div>
+          <span className="text-xs font-mono-num text-[#64748B] dark:text-[#94A3B8]">
+            {seleccionadosSet.size > 0
+              ? `${valorizacionSeleccion.totalLotes} lotes · ${formatearEnteroBolivia(valorizacionSeleccion.totalSacos)} sacos (${formatearNumeroBolivia(valorizacionSeleccion.pesoPromedioPorSacoKg, 1)} kg/saco)`
+              : 'Marca lotes abajo para calcular cuánto recibirás en Bs y por saco'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mt-4">
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#060D14] border border-[#E2E8F0] dark:border-[#152E42]">
+            <span className="text-xs text-[#64748B] dark:text-[#94A3B8] block">Sacos y Peso / Saco</span>
+            <span className="text-lg font-mono-num font-bold text-[#0F172A] dark:text-[#F8FAFC]">
+              {formatearEnteroBolivia(valorizacionSeleccion.totalSacos)} sacos
+            </span>
+            <span className="text-xs font-mono-num text-violet-600 dark:text-violet-400 block">
+              {formatearNumeroBolivia(valorizacionSeleccion.pesoPromedioPorSacoKg, 2)} kg / saco
+            </span>
+          </div>
+
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#060D14] border border-[#E2E8F0] dark:border-[#152E42]">
+            <span className="text-xs text-[#64748B] dark:text-[#94A3B8] block">Valor Bruto</span>
+            <span className="text-lg font-mono-num font-bold text-[#0F172A] dark:text-[#F8FAFC]">
+              {formatearMonedaBob(valorizacionSeleccion.valorBrutoTotalBob)}
+            </span>
+            <span className="text-xs font-mono-num text-[#64748B] dark:text-[#94A3B8] block">
+              {formatearMonedaUsd(valorizacionSeleccion.valorBrutoTotalUsd)}
+            </span>
+          </div>
+
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#060D14] border border-[#E2E8F0] dark:border-[#152E42]">
+            <span className="text-xs text-[#64748B] dark:text-[#94A3B8] block">Regalía Minera (Ley 535)</span>
+            <span className="text-lg font-mono-num font-bold text-rose-600 dark:text-rose-400">
+              - {formatearMonedaBob(valorizacionSeleccion.regaliaTotalBob)}
+            </span>
+            <span className="text-xs font-mono-num text-[#64748B] dark:text-[#94A3B8] block">
+              - {formatearMonedaUsd(valorizacionSeleccion.regaliaTotalUsd)}
+            </span>
+          </div>
+
+          <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-500/40">
+            <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 block">Total a Recibir (Bs)</span>
+            <span className="text-xl font-mono-num font-extrabold text-emerald-700 dark:text-emerald-300" data-testid="resumen-total-bs">
+              {formatearMonedaBob(valorizacionSeleccion.valorNetoTotalBob)}
+            </span>
+            <span className="text-xs font-mono-num text-emerald-700/80 dark:text-emerald-200/80 block">
+              {formatearMonedaUsd(valorizacionSeleccion.valorNetoTotalUsd)}
+            </span>
+          </div>
+
+          <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/25 border border-amber-500/40">
+            <span className="text-xs font-bold text-amber-700 dark:text-amber-300 block">Promedio por Saco / Lote</span>
+            <span className="text-lg font-mono-num font-extrabold text-amber-700 dark:text-amber-300" data-testid="resumen-bs-saco">
+              {formatearMonedaBob(valorizacionSeleccion.valorPromedioPorSacoBob)} / saco
+            </span>
+            <span className="text-xs font-mono-num text-amber-700/80 dark:text-amber-200/80 block">
+              {formatearMonedaBob(valorizacionSeleccion.valorPromedioPorLoteBob)} / lote
+            </span>
+          </div>
+        </div>
+      </div>
 
       {/* Filtros de búsqueda y Acciones Masivas */}
       <div className="bg-white dark:bg-[#0A1622] border border-slate-200 dark:border-[#1A364E] rounded-2xl p-4 shadow-2xs space-y-3">
@@ -826,12 +912,14 @@ export function SeleccionVentaPage() {
                   <th className="py-3 px-3 text-right">Sacos</th>
                   <th className="py-3 px-3 text-right">Peso Húmedo / Seco</th>
                   <th className="py-3 px-3">Leyes Individuales</th>
+                  <th className="py-3 px-3 text-right">Valor Lote / Saco</th>
                   <th className="py-3 px-4 text-right">Acción</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200/70 dark:divide-[#1A364E]/70 text-xs">
                 {lotesVisiblesEnPagina.map((lote) => {
                   const marcado = seleccionadosSet.has(lote.id);
+                  const vl = calcularValorizacionLote(lote, cotizaciones, usarPesoSeco, tipoCambio);
                   return (
                     <tr
                       key={lote.id}
@@ -873,6 +961,9 @@ export function SeleccionVentaPage() {
                       </td>
                       <td className="py-3 px-3 text-right font-mono-num font-semibold">
                         {lote.cantidadSacos}
+                        <span className="block text-[10px] font-normal text-slate-500 dark:text-[#94A3B8]">
+                          {formatearNumeroBolivia(vl.pesoPorSacoKg, 1)} kg/saco
+                        </span>
                       </td>
                       <td className="py-3 px-3 text-right font-mono-num">
                         <span className="font-bold text-slate-900 dark:text-[#F8FAFC] block">
@@ -897,6 +988,14 @@ export function SeleccionVentaPage() {
                             </span>
                           ))}
                         </div>
+                      </td>
+                      <td className="py-3 px-3 text-right font-mono-num">
+                        <span className="font-bold text-emerald-600 dark:text-emerald-400 block">
+                          {formatearMonedaBob(vl.valorNetoBob)}
+                        </span>
+                        <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold block">
+                          {formatearMonedaBob(vl.valorPorSacoBob)} / saco
+                        </span>
                       </td>
                       <td
                         className="py-3 px-4 text-right"
@@ -1021,10 +1120,21 @@ export function SeleccionVentaPage() {
 
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-300 block">
+              A RECIBIR ({formatearMonedaBob(valorizacionSeleccion.valorPromedioPorSacoBob)}/saco)
+            </span>
+            <span className="text-lg font-mono-num font-extrabold text-emerald-400">
+              {formatearMonedaBob(valorizacionSeleccion.valorNetoTotalBob)}
+            </span>
+          </div>
+
+          <div className="h-8 w-px bg-white/15 hidden sm:block" />
+
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-300 block">
               LEY PROMEDIO CALCULADA
             </span>
             <span
-              className="text-sm sm:text-base font-mono-num font-bold text-emerald-400"
+              className="text-sm sm:text-base font-mono-num font-bold text-white"
               data-testid="resumen-ley-promedio"
             >
               {textoLeyBarraResumen}
@@ -1186,6 +1296,29 @@ export function SeleccionVentaPage() {
                     <span className="text-slate-500 dark:text-[#94A3B8] block">Peso Total ({usarPesoSeco ? 'Seco' : 'Neto'})</span>
                     <span className="text-xl font-mono-num font-extrabold text-[#0891B2] dark:text-[#22D3EE]">
                       {resumenTiempoReal.pesoTotalKgStr} kg
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-500/40 sm:col-span-2">
+                    <span className="text-emerald-700 dark:text-emerald-300 font-bold block">Total Líquido a Recibir (descontada Regalía Ley 535)</span>
+                    <div className="flex items-baseline gap-3 mt-1">
+                      <span className="text-2xl font-mono-num font-extrabold text-emerald-700 dark:text-emerald-300">
+                        {formatearMonedaBob(valorizacionSeleccion.valorNetoTotalBob)}
+                      </span>
+                      <span className="text-sm font-mono-num font-semibold text-emerald-600 dark:text-emerald-400">
+                        ({formatearMonedaUsd(valorizacionSeleccion.valorNetoTotalUsd)})
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-500/40">
+                    <span className="text-amber-700 dark:text-amber-300 font-bold block">Valor por Saco</span>
+                    <span className="text-lg font-mono-num font-extrabold text-amber-700 dark:text-amber-300 block mt-1">
+                      {formatearMonedaBob(valorizacionSeleccion.valorPromedioPorSacoBob)}
+                    </span>
+                    <span className="text-xs font-mono-num text-[#64748B] dark:text-[#94A3B8]">
+                      {formatearNumeroBolivia(valorizacionSeleccion.pesoPromedioPorSacoKg, 1)} kg/saco
                     </span>
                   </div>
                 </div>

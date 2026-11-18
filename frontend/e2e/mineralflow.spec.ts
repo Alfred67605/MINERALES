@@ -30,21 +30,21 @@ test.describe('Suite E2E Integral — MineralFlow 2.0 (3D, Fallback 2D, Laborato
     await expect(page.getByRole('button', { name: /Ingresar a MineralFlow/i })).toBeVisible();
     await page.getByRole('button', { name: /Ingresar a MineralFlow/i }).click();
 
-    // 2. Verificar Resumen General del Negocio y Vista 3D
+    // 2. Verificar Resumen General del Negocio y Desglose en Bolivianos
     await expect(
       page.getByRole('heading', { name: /Resumen del Negocio/i })
     ).toBeVisible();
     await expect(
-      page.getByText(/Vista 3D · Resumen de Tu Almacén y Ventas/i)
+      page.getByText(/Detalle del Almacén por Mineral, Sacos y Valor en Bolivianos/i)
     ).toBeVisible();
     await expect(page.getByText('Lotes Disponibles en Almacén', { exact: true })).toBeVisible();
     await page.screenshot({ path: '../docs/evidence_01_dashboard_3d.png', fullPage: true });
 
-    // 3. Navegar a Mi Almacén (Vista 3D + Movimientos de Almacén)
+    // 3. Navegar a Mi Almacén (Zonas + Movimientos de Almacén)
     await page.getByRole('link', { name: /Mi Almacén/i }).click();
     await expect(page.getByRole('heading', { name: 'Mi Almacén', exact: true })).toBeVisible();
     await expect(
-      page.getByText(/VISUALIZACIÓN POR TAMAÑO Y TIPO DE MINERAL/i)
+      page.getByText('ZONA-A1').first()
     ).toBeVisible();
     await page.screenshot({ path: '../docs/evidence_02_almacen_3d.png', fullPage: true });
 
@@ -69,15 +69,29 @@ test.describe('Suite E2E Integral — MineralFlow 2.0 (3D, Fallback 2D, Laborato
     await expect(page.getByText(/01 · ORIGEN MINERO/i)).toBeVisible();
     await page.screenshot({ path: '../docs/evidence_04_trazabilidad_m02.png', fullPage: true });
 
-    // 6. Respaldo de Datos: crear respaldo, verlo en la lista y descargarlo
+    // 6. Respaldo de Datos Avanzado: programación, crear respaldo, verlo en la lista y descargarlo
     await page.getByRole('link', { name: /Respaldo de Datos/i }).click();
-    await expect(page.getByRole('heading', { name: 'Respaldo de Datos' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Copias de Seguridad (Backups)' })).toBeVisible();
+    await expect(page.getByText(/Programación de Respaldos Automáticos/i)).toBeVisible();
     await page.getByTestId('btn-crear-respaldo').click();
     await expect(page.getByText('Respaldo creado correctamente.')).toBeVisible();
     await expect(page.getByRole('button', { name: /Descargar/i }).first()).toBeVisible();
     await page.screenshot({ path: '../docs/evidence_09_respaldo.png', fullPage: true });
 
-    // 7. Navegar a Vender Lotes (Vista 3D, Shift+Clic, 40 lotes y Fallback 2D)
+    // 6b. Verificar Perfiles, Usuarios y Permisos
+    await page.getByRole('link', { name: /Usuarios y Permisos/i }).click();
+    await expect(page.getByRole('heading', { name: 'Perfiles, Usuarios y Permisos' })).toBeVisible();
+    await page.screenshot({ path: '../docs/evidence_11_perfiles.png', fullPage: true });
+
+    // 6c. Verificar Reportes y Estadísticas
+    await page.getByRole('link', { name: /Reportes y Estadísticas/i }).click();
+    await expect(page.getByRole('heading', { name: 'Reportes y Estadísticas' })).toBeVisible();
+    await expect(page.getByTestId('btn-reporte-pdf')).toBeVisible();
+    await expect(page.getByTestId('btn-reporte-excel')).toBeVisible();
+    await expect(page.getByText('Bs / Saco').first()).toBeVisible();
+    await page.screenshot({ path: '../docs/evidence_10_reportes.png', fullPage: true });
+
+    // 7. Navegar a Vender Lotes (Cálculo en Bs, Shift+Clic y 40 lotes)
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.getByRole('link', { name: /Vender Lotes/i }).click();
     await expect(
@@ -90,15 +104,13 @@ test.describe('Suite E2E Integral — MineralFlow 2.0 (3D, Fallback 2D, Laborato
     await page.getByTestId('fila-lote-LT-2026-0105').click({ modifiers: ['Shift'] });
     await expect(page.getByTestId('resumen-total-lotes')).toHaveText('5');
 
-    // Limpiar y seleccionar 40 lotes
+    // Limpiar y seleccionar 40 lotes, verificando valorización en Bolivianos (Bs) y Bs/saco
     await page.getByTestId('btn-limpiar-seleccion').click();
     await page.getByTestId('btn-seleccionar-40').click();
     await expect(page.getByTestId('resumen-total-lotes')).toHaveText('40');
+    await expect(page.getByTestId('resumen-total-bs')).toContainText('Bs');
+    await expect(page.getByTestId('resumen-bs-saco')).toContainText('Bs');
     await page.screenshot({ path: '../docs/evidence_05_seleccion_3d_40lotes.png', fullPage: true });
-
-    // Probar Prueba Específica 10: Desactivar 3D (Modo 2D) y verificar que la venta sigue funcionando al 100%
-    await page.getByTestId('btn-toggle-3d').click();
-    await expect(page.getByText(/Bandeja de Consolidación \(Modo 2D\): 40 lotes/i)).toBeVisible();
 
     // Activar "VER SOLO SELECCIONADOS"
     await page.getByTestId('btn-ver-solo-seleccionados').click();
@@ -111,9 +123,6 @@ test.describe('Suite E2E Integral — MineralFlow 2.0 (3D, Fallback 2D, Laborato
     ).toBeVisible();
     await page.getByTestId('btn-confirmar-cierre-venta').click();
     await expect(page.getByText(/registrada y cerrada con éxito!/i)).toBeVisible();
-
-    // Reactivar 3D para dejar la preferencia encendida
-    await page.getByTestId('btn-toggle-3d').click();
 
     // 8. Verificar Módulo de Precios de Minerales (Oficial Quincenal, En Vivo y Manual) y Modo Oscuro Azul Cian
     await page.setViewportSize({ width: 1440, height: 900 });

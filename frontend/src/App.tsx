@@ -15,6 +15,7 @@ import { TrazabilidadPage } from './pages/TrazabilidadPage';
 import { AuditoriaPage } from './pages/AuditoriaPage';
 import { RespaldoPage } from './pages/RespaldoPage';
 import { CotizacionesPage } from './pages/CotizacionesPage';
+import { ReportesEstadisticasPage } from './pages/ReportesEstadisticasPage';
 
 function AppRoutes() {
   const { usuario, cargando } = useAuth();
@@ -44,6 +45,7 @@ function AppRoutes() {
         <Route path="/almacen" element={<AlmacenPage />} />
         <Route path="/seleccion-venta" element={<SeleccionVentaPage />} />
         <Route path="/historial-ventas" element={<HistorialVentasPage />} />
+        <Route path="/reportes" element={<ReportesEstadisticasPage />} />
         <Route path="/catalogos" element={<CatalogosPage />} />
         <Route path="/cotizaciones" element={<CotizacionesPage />} />
         <Route path="/laboratorio" element={<LaboratorioPage />} />
