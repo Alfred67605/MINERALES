@@ -5,7 +5,7 @@ test.describe('Suite E2E Integral — MineralFlow 2.0 (3D, Fallback 2D, Laborato
   test.beforeAll(async () => {
     try {
       execSync('npx tsx scripts/reset_lots.ts', { cwd: '../backend', stdio: 'ignore' });
-    } catch {}
+    } catch { }
   });
 
   test('Verifica todas las pantallas renovadas, escenas 3D y fallback 2D, selección masiva (Shift+Clic y 40 lotes), laboratorio, trazabilidad M-02, HyperFrames en /acerca y responsive (1720px, 1440px, 1366px y 375px)', async ({
