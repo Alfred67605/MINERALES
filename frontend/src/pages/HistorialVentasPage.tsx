@@ -267,15 +267,9 @@ export function HistorialVentasPage() {
       {/* Cabecera Módulo 7 */}
       <div className="bg-white dark:bg-[#0A1622] border border-slate-200 dark:border-[#1A364E] rounded-2xl p-6 shadow-2xs flex flex-col lg:flex-row lg:items-center justify-between gap-4 no-print">
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">
-            HISTORIAL DE VENTAS · RECIBOS Y REPORTES DESCARGABLES
-          </span>
           <h1 className="font-display text-3xl text-slate-900 dark:text-[#F8FAFC] mt-0.5">
             Ventas Realizadas
           </h1>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-[#94A3B8] mt-1">
-            Revisa todas tus ventas cerradas, mira qué lotes entregaste en cada operación y descarga tus comprobantes en PDF o Excel.
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 shrink-0">

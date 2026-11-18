@@ -336,15 +336,9 @@ export function SeleccionVentaPage() {
       {/* Cabecera Venta de Lotes */}
       <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] rounded-2xl p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 transition-colors">
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400">
-            VENTA DE MINERALES · ELIGE TUS LOTES Y CALCULA TU VENTA
-          </span>
           <h1 className="font-display text-2xl sm:text-3xl text-[#0F172A] dark:text-[#F8FAFC] mt-0.5">
-            Selección Inteligente de Lotes para Vender
+            Vender Lotes
           </h1>
-          <p className="text-sm text-[#334155] dark:text-[#CBD5E1] mt-1">
-            Solo aparecen lotes listos para vender. Marca los que quieras haciendo clic (o usa <strong>Shift + Clic</strong> para elegir varios seguidos) y mira las leyes promedio al instante.
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 shrink-0">

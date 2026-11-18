@@ -10,6 +10,7 @@ import { ventasRoutes } from './routes/ventas.js';
 import { dashboardRoutes } from './routes/dashboard.js';
 import { operacionesV2Routes } from './routes/operacionesV2.js';
 import { cotizacionesRoutes } from './routes/cotizaciones.js';
+import { respaldosRoutes } from './routes/respaldos.js';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(dashboardRoutes);
   await app.register(operacionesV2Routes);
   await app.register(cotizacionesRoutes);
+  await app.register(respaldosRoutes);
 
   return app;
 }

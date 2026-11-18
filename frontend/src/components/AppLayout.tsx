@@ -15,14 +15,13 @@ import {
   ChevronRight,
   FlaskConical,
   GitBranch,
-  Info,
+  DatabaseBackup,
   Bell,
   Box,
   Rows3,
   Sun,
   Moon,
   TrendingUp,
-  ArrowRight,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
@@ -128,7 +127,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       ],
     },
     {
-      grupo: 'ADMINISTRACIÓN Y AYUDA',
+      grupo: 'ADMINISTRACIÓN',
       items: [
         {
           to: '/auditoria',
@@ -139,12 +138,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           visible: tienePermiso('ADMINISTRADOR'),
         },
         {
-          to: '/acerca',
-          label: 'Guía del Sistema',
-          icon: Info,
+          to: '/respaldo',
+          label: 'Respaldo de Datos',
+          icon: DatabaseBackup,
           iconColor: 'text-emerald-600 dark:text-emerald-400',
-          descripcion: 'Cómo funciona y video explicativo',
-          visible: true,
+          descripcion: '',
+          visible: tienePermiso('ADMINISTRADOR'),
         },
       ],
     },
@@ -264,15 +263,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                                 Vivo
                               </span>
                             )}
-                          </div>
-                          <div
-                            className={`text-[11px] truncate ${
-                              isActive
-                                ? 'text-white/90 dark:text-[#041019]/85'
-                                : 'text-[#64748B] dark:text-[#94A3B8]'
-                            }`}
-                          >
-                            {item.descripcion}
                           </div>
                         </div>
                       )}
@@ -523,53 +513,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             )}
           </div>
         </header>
-
-        {/* Cinta de Precios de Minerales con Colores Distintivos - Clickeable */}
-        <div
-          onClick={() => navigate('/cotizaciones')}
-          className="bg-[#071320] text-[#F8FAFC] border-b border-[#1A364E] px-4 sm:px-6 py-2 flex items-center justify-between text-xs overflow-x-auto no-print scrollbar-none gap-6 cursor-pointer hover:bg-[#0B1D30] transition-colors"
-          title="Haz clic para abrir la tabla completa de precios y calculadora"
-        >
-          <div className="flex items-center gap-4 shrink-0">
-            <div className="flex items-center gap-1.5 font-bold text-[#22D3EE]">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-              </span>
-              <span>PRECIOS REFERENCIALES:</span>
-            </div>
-            <div className="flex items-center gap-2 font-mono-num font-semibold text-[#F8FAFC]">
-              <span className="inline-flex items-center gap-1 bg-cyan-950/60 px-2.5 py-0.5 rounded-lg border border-cyan-500/40">
-                <strong className="text-cyan-300">Zinc:</strong> $1.73/LF
-              </span>
-              <span className="inline-flex items-center gap-1 bg-emerald-950/60 px-2.5 py-0.5 rounded-lg border border-emerald-500/40">
-                <strong className="text-emerald-300">Estaño:</strong> $21.53/LF
-              </span>
-              <span className="inline-flex items-center gap-1 bg-amber-950/60 px-2.5 py-0.5 rounded-lg border border-amber-500/50">
-                <strong className="text-amber-300">Oro:</strong> $4,010.22/OT
-              </span>
-              <span className="inline-flex items-center gap-1 bg-violet-950/60 px-2.5 py-0.5 rounded-lg border border-violet-500/40">
-                <strong className="text-violet-300">Plata:</strong> $51.46/OT
-              </span>
-              <span className="inline-flex items-center gap-1 bg-indigo-950/60 px-2.5 py-0.5 rounded-lg border border-indigo-500/40">
-                <strong className="text-indigo-300">Plomo:</strong> $0.84/LF
-              </span>
-              <span className="inline-flex items-center gap-1 bg-orange-950/60 px-2.5 py-0.5 rounded-lg border border-orange-500/40">
-                <strong className="text-orange-300">Cobre:</strong> $6.35/LF
-              </span>
-              <span className="inline-flex items-center gap-1 bg-[#0F2232] px-2.5 py-0.5 rounded-lg border border-[#1A364E] text-slate-200">
-                <strong>Dólar:</strong> 6.96 Bs
-              </span>
-            </div>
-          </div>
-
-          <div className="hidden xl:flex items-center gap-3 text-[#94A3B8] shrink-0 font-mono-num text-xs">
-            <span className="flex items-center gap-1 text-amber-300 font-bold">
-              <span>Ver Tabla y Calculadora</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </span>
-          </div>
-        </div>
 
         <main className="flex-1 p-5 sm:p-8 lg:p-12 max-w-[1560px] w-full mx-auto">
           {children}

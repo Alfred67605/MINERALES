@@ -98,15 +98,9 @@ export function LaboratorioPage() {
       {/* Cabecera Laboratorio */}
       <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors">
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-            RESULTADOS DE LABORATORIO · LEYES QUÍMICAS DE CADA LOTE
-          </span>
           <h1 className="font-display text-2xl sm:text-3xl text-[#0F172A] dark:text-[#F8FAFC] mt-0.5">
-            Laboratorio y Análisis Mineralógico
+            Leyes de Laboratorio
           </h1>
-          <p className="text-xs sm:text-sm text-[#334155] dark:text-[#94A3B8] mt-1">
-            Consulta o actualiza el análisis químico y certificado de laboratorio de cada lote. Los lotes ya vendidos quedan bloqueados para evitar cambios.
-          </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">

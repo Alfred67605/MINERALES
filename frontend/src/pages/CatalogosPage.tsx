@@ -221,15 +221,9 @@ export function CatalogosPage() {
       {/* Cabecera Módulo 8 */}
       <div className="bg-white dark:bg-[#0A1622] border border-slate-200 dark:border-[#1A364E] rounded-2xl p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400">
-            DIRECTORIO DE CONTACTOS · PROVEEDORES, MINAS Y CLIENTES
-          </span>
           <h1 className="font-display text-3xl text-slate-900 dark:text-[#F8FAFC] mt-0.5">
-            Proveedores, Minas y Clientes
+            Proveedores y Clientes
           </h1>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-[#94A3B8] mt-1">
-            Administra la lista de cooperativas mineras, minas de procedencia y empresas que te compran mineral.
-          </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">

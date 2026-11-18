@@ -32,7 +32,7 @@ test.describe('Suite E2E Integral — MineralFlow 2.0 (3D, Fallback 2D, Laborato
 
     // 2. Verificar Resumen General del Negocio y Vista 3D
     await expect(
-      page.getByRole('heading', { name: /Control de Compras, Almacén y Ventas de Minerales/i })
+      page.getByRole('heading', { name: /Resumen del Negocio/i })
     ).toBeVisible();
     await expect(
       page.getByText(/Vista 3D · Resumen de Tu Almacén y Ventas/i)
@@ -42,7 +42,7 @@ test.describe('Suite E2E Integral — MineralFlow 2.0 (3D, Fallback 2D, Laborato
 
     // 3. Navegar a Mi Almacén (Vista 3D + Movimientos de Almacén)
     await page.getByRole('link', { name: /Mi Almacén/i }).click();
-    await expect(page.getByRole('heading', { name: 'Mi Almacén de Minerales' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Mi Almacén', exact: true })).toBeVisible();
     await expect(
       page.getByText(/VISUALIZACIÓN POR TAMAÑO Y TIPO DE MINERAL/i)
     ).toBeVisible();
@@ -56,7 +56,7 @@ test.describe('Suite E2E Integral — MineralFlow 2.0 (3D, Fallback 2D, Laborato
     // 4. Navegar a Leyes de Laboratorio
     await page.getByRole('link', { name: /Leyes de Laboratorio/i }).click();
     await expect(
-      page.getByRole('heading', { name: 'Laboratorio y Análisis Mineralógico' })
+      page.getByRole('heading', { name: 'Leyes de Laboratorio' })
     ).toBeVisible();
     await expect(page.getByText(/CERT-LAB-/i).first()).toBeVisible();
     await page.screenshot({ path: '../docs/evidence_03_laboratorio.png', fullPage: true });
@@ -69,20 +69,19 @@ test.describe('Suite E2E Integral — MineralFlow 2.0 (3D, Fallback 2D, Laborato
     await expect(page.getByText(/01 · ORIGEN MINERO/i)).toBeVisible();
     await page.screenshot({ path: '../docs/evidence_04_trazabilidad_m02.png', fullPage: true });
 
-    // 6. Navegar a Guía del Sistema y verificar HyperFrames
-    await page.getByRole('link', { name: /Guía del Sistema/i }).click();
-    await expect(
-      page.getByRole('heading', { name: /Guía de Uso — MineralFlow 2.0/i })
-    ).toBeVisible();
-    await page.getByTestId('btn-abrir-hyperframes-acerca').click();
-    await expect(page.getByText(/ESCENA 1 DE 5/i)).toBeVisible();
-    await page.getByRole('button', { name: /Cerrar presentación/i }).click();
+    // 6. Respaldo de Datos: crear respaldo, verlo en la lista y descargarlo
+    await page.getByRole('link', { name: /Respaldo de Datos/i }).click();
+    await expect(page.getByRole('heading', { name: 'Respaldo de Datos' })).toBeVisible();
+    await page.getByTestId('btn-crear-respaldo').click();
+    await expect(page.getByText('Respaldo creado correctamente.')).toBeVisible();
+    await expect(page.getByRole('button', { name: /Descargar/i }).first()).toBeVisible();
+    await page.screenshot({ path: '../docs/evidence_09_respaldo.png', fullPage: true });
 
     // 7. Navegar a Vender Lotes (Vista 3D, Shift+Clic, 40 lotes y Fallback 2D)
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.getByRole('link', { name: /Vender Lotes/i }).click();
     await expect(
-      page.getByRole('heading', { name: 'Selección Inteligente de Lotes para Vender' })
+      page.getByRole('heading', { name: 'Vender Lotes', exact: true })
     ).toBeVisible();
 
     // Selección por rango con Shift + Clic (LT-2026-0101 a LT-2026-0105 = 5 lotes)
@@ -120,7 +119,7 @@ test.describe('Suite E2E Integral — MineralFlow 2.0 (3D, Fallback 2D, Laborato
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.getByRole('link', { name: /Precios de Minerales/i }).click();
     await expect(
-      page.getByRole('heading', { name: /Precios de Minerales y Calculadora de Pago/i })
+      page.getByRole('heading', { name: /Precios de Minerales/i })
     ).toBeVisible();
 
     // Asegurar modo Oficial Quincenal y verificar valores oficiales (segunda imagen SENARECOM Noviembre 2026)

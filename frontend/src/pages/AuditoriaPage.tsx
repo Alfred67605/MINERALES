@@ -57,15 +57,9 @@ export function AuditoriaPage() {
     <div className="space-y-6">
       <div className="bg-white dark:bg-[#0A1622] border border-slate-200 dark:border-[#1A364E] rounded-2xl p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">
-            ADMINISTRACIÓN · USUARIOS DEL SISTEMA Y REGISTRO DE ACTIVIDAD
-          </span>
           <h1 className="font-display text-3xl text-slate-900 dark:text-[#F8FAFC] mt-0.5">
-            Usuarios, Permisos y Actividad
+            Usuarios y Permisos
           </h1>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-[#94A3B8] mt-1">
-            Administra las cuentas del personal y revisa todo lo que se ha hecho en el sistema (compras, cambios y ventas).
-          </p>
         </div>
 
         <button

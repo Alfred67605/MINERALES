@@ -85,15 +85,9 @@ export function TrazabilidadPage() {
       {/* Cabecera Trazabilidad y Normativa SENARECOM */}
       <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] rounded-2xl p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 transition-colors">
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-            SEGUIMIENTO COMPLETO · HISTORIA DE CADA LOTE PASO A PASO
-          </span>
           <h1 className="font-display text-2xl sm:text-3xl text-[#0F172A] dark:text-[#F8FAFC] mt-0.5">
-            Seguimiento de Lotes (De la Mina a la Venta)
+            Seguimiento de Lotes
           </h1>
-          <p className="text-xs sm:text-sm text-[#334155] dark:text-[#94A3B8] mt-1">
-            Mira fácilmente toda la historia de cualquier lote: <strong>De qué mina llegó → Cuándo se pesó → Análisis de laboratorio → Dónde está guardado → A quién se vendió</strong>.
-          </p>
         </div>
 
         {puedeAdjuntar && (
@@ -105,32 +99,6 @@ export function TrazabilidadPage() {
             <span>Registrar Respaldo M-02 / Boleto</span>
           </button>
         )}
-      </div>
-
-      {/* Aviso de alcance regulatorio explícito (Sección 6.10 del Prompt Maestro) */}
-      <div className="bg-amber-50 dark:bg-amber-500/10 border border-[#0891B2]/50 dark:border-[#06B6D4]/50 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-700 dark:text-amber-300">
-        <div className="flex items-start gap-2.5">
-          <ShieldAlert className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-          <div>
-            <strong className="block text-slate-900 dark:text-[#F8FAFC]">
-              Nota Técnica y Regulatoria — Asistencia Documental Interna (SENARECOM / ISO)
-            </strong>
-            <span>
-              Este módulo organiza internamente los respaldos de Formulario M-02 (compra-venta interna), NIM/NIAR, M-03 (exportación opcional) y muestreo/humedad (ISO 12743 / ISO 10251). No sustituye la declaración oficial ante SINACOM.
-            </span>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <a
-            href="https://www.senarecom.gob.bo/index.php/lista-tramites-page/"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white dark:bg-[#0A1622] border border-[#0891B2]/50 dark:border-[#06B6D4]/50 font-bold text-slate-900 dark:text-[#F8FAFC] hover:bg-slate-100 dark:hover:bg-[#0F2232]/60"
-          >
-            <span>Guía SENARECOM</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
-        </div>
       </div>
 
       {mensaje && (
@@ -150,11 +118,8 @@ export function TrazabilidadPage() {
           <div>
             <h2 className="text-base font-bold text-slate-900 dark:text-[#F8FAFC] flex items-center gap-2">
               <GitBranch className="w-4 h-4 text-[#0891B2] dark:text-[#22D3EE]" />
-              <span>Escena D · Cadena Interactiva de Trazabilidad por Lote</span>
+              <span>Recorrido del lote</span>
             </h2>
-            <p className="text-xs text-slate-500 dark:text-[#94A3B8]">
-              Seleccione cualquier lote del selector para auditar sus 6 eslabones de trazabilidad directa e inversa.
-            </p>
           </div>
 
           <div className="flex items-center gap-2">

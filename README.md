@@ -167,6 +167,12 @@ El formulario de inicio de sesión ya viene precargado con el usuario administra
 
 ---
 
+## 💾 Respaldo de Datos
+
+En el menú **Administración → Respaldo de Datos** (solo administrador) puedes crear un respaldo completo de la base, descargarlo, cargarlo en otra PC y restaurarlo. Los archivos se guardan en ackups/respaldos/.
+
+---
+
 ## 🧪 Ejecución de Pruebas Automatizadas
 
 El proyecto incluye suites completas de verificación:

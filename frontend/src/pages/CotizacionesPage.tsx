@@ -242,16 +242,9 @@ export function CotizacionesPage() {
       {/* Cabecera Clara y Control de Modos */}
       <div className="bg-[#FFFFFF] dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] rounded-2xl p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-5 transition-colors">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-            <Building2 className="w-4 h-4" />
-            <span>PRECIOS OFICIALES BOLIVIA · {quincena}</span>
-          </div>
           <h1 className="font-display text-2xl sm:text-3xl text-[#0F172A] dark:text-[#F8FAFC] mt-1">
-            Precios de Minerales y Calculadora de Pago
+            Precios de Minerales
           </h1>
-          <p className="text-sm text-[#334155] dark:text-[#CBD5E1] mt-1 max-w-3xl">
-            Consulta los precios oficiales de la quincena, mira variaciones en vivo o escribe tú mismo el precio manualmente para calcular cuánto vale un lote.
-          </p>
         </div>
 
         {/* Conmutador de 3 Modos con Colores Vivos */}

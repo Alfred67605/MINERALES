@@ -35,6 +35,9 @@ playwright-report/
 .turbo/
 .cache/
 
+# Respaldos de datos generados por el sistema
+backups/respaldos/
+
 # Scratch & temporary helper files
 scratch/
 */scratch/

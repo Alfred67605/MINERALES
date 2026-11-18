@@ -13,7 +13,7 @@ import { CatalogosPage } from './pages/CatalogosPage';
 import { LaboratorioPage } from './pages/LaboratorioPage';
 import { TrazabilidadPage } from './pages/TrazabilidadPage';
 import { AuditoriaPage } from './pages/AuditoriaPage';
-import { AcercaPage } from './pages/AcercaPage';
+import { RespaldoPage } from './pages/RespaldoPage';
 import { CotizacionesPage } from './pages/CotizacionesPage';
 
 function AppRoutes() {
@@ -49,7 +49,7 @@ function AppRoutes() {
         <Route path="/laboratorio" element={<LaboratorioPage />} />
         <Route path="/trazabilidad" element={<TrazabilidadPage />} />
         <Route path="/auditoria" element={<AuditoriaPage />} />
-        <Route path="/acerca" element={<AcercaPage />} />
+        <Route path="/respaldo" element={<RespaldoPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AppLayout>

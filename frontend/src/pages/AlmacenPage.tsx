@@ -175,15 +175,9 @@ export function AlmacenPage() {
       <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] rounded-2xl p-6 shadow-sm space-y-5 transition-colors">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-              INVENTARIO ACTUAL · LOTES EN ALMACÉN
-            </span>
             <h1 className="font-display text-2xl sm:text-3xl text-[#0F172A] dark:text-[#F8FAFC] mt-0.5">
-              Mi Almacén de Minerales
+            Mi Almacén
             </h1>
-            <p className="text-sm text-[#334155] dark:text-[#CBD5E1] mt-1">
-              Aquí ves tus lotes en estado <strong>DISPONIBLE</strong> listos para vender, cuántos sacos tienen, su peso y su análisis químico.
-            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2 shrink-0">

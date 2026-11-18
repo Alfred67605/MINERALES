@@ -109,15 +109,9 @@ export function DashboardPage() {
       {/* Cabecera Sencilla y Clara para el Cliente */}
       <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] rounded-2xl p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-5 transition-colors">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">
-            <span>RESUMEN GENERAL DEL NEGOCIO · BOLIVIA</span>
-          </div>
           <h1 className="font-display text-2xl sm:text-3xl text-[#0F172A] dark:text-[#F8FAFC] mt-1">
-            Control de Compras, Almacén y Ventas de Minerales
+            Resumen del Negocio
           </h1>
-          <p className="text-sm text-[#334155] dark:text-[#CBD5E1] mt-1 max-w-3xl">
-            Revisa de forma sencilla cuántos lotes tienes disponibles en almacén, cuánto pesan tus minerales y tus últimas operaciones.
-          </p>
         </div>
 
         {/* Botones de Acción Rápida con Colores Distintivos */}
@@ -155,73 +149,6 @@ export function DashboardPage() {
             <span>Vender Lotes</span>
           </button>
         </div>
-      </div>
-
-      {/* Guía Rápida de 4 Pasos con Colores Diferenciados */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <button
-          type="button"
-          onClick={() => navigate('/compras')}
-          className="text-left bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] border-t-4 border-t-emerald-500 hover:border-emerald-400 rounded-2xl p-4 shadow-sm transition group"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-              1. REGISTRAR COMPRA
-            </span>
-            <PlusCircle className="w-5 h-5 text-emerald-500 group-hover:scale-110 transition-transform" />
-          </div>
-          <p className="text-xs text-[#334155] dark:text-[#94A3B8] mt-1.5">
-            Ingresar nuevos lotes de mineral y sacos al almacén.
-          </p>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => navigate('/almacen')}
-          className="text-left bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] border-t-4 border-t-cyan-500 hover:border-cyan-400 rounded-2xl p-4 shadow-sm transition group"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-cyan-600 dark:text-cyan-400">
-              2. VER MI ALMACÉN
-            </span>
-            <Warehouse className="w-5 h-5 text-cyan-500 group-hover:scale-110 transition-transform" />
-          </div>
-          <p className="text-xs text-[#334155] dark:text-[#94A3B8] mt-1.5">
-            Ver los {formatearEnteroBolivia(ind.lotesDisponibles)} lotes guardados y sus ubicaciones.
-          </p>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => navigate('/cotizaciones')}
-          className="text-left bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] border-t-4 border-t-amber-500 hover:border-amber-400 rounded-2xl p-4 shadow-sm transition group"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
-              3. PRECIOS DEL DÍA
-            </span>
-            <TrendingUp className="w-5 h-5 text-amber-500 group-hover:scale-110 transition-transform" />
-          </div>
-          <p className="text-xs text-[#334155] dark:text-[#94A3B8] mt-1.5">
-            Consultar o cambiar precios de Oro, Estaño y Plata.
-          </p>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => navigate('/seleccion-venta')}
-          className="text-left bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] border-t-4 border-t-violet-500 hover:border-violet-400 rounded-2xl p-4 shadow-sm transition group"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-violet-600 dark:text-violet-400">
-              4. VENDER LOTES
-            </span>
-            <CheckSquare className="w-5 h-5 text-violet-500 group-hover:scale-110 transition-transform" />
-          </div>
-          <p className="text-xs text-[#334155] dark:text-[#94A3B8] mt-1.5">
-            Juntar varios lotes disponibles y cerrar una venta.
-          </p>
-        </button>
       </div>
 
       {/* HERO ASIMÉTRICO: Vista 3D + Tarjetas de Totales Diferenciadas por Color */}
