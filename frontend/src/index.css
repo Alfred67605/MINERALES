@@ -1,0 +1,249 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    /* Modo Claro Industrial Profesional */
+    color-scheme: light;
+    --bg-root: #F1F5F9;
+    --bg-surface: #FFFFFF;
+    --bg-card: #FFFFFF;
+    --bg-muted: #E2E8F0;
+    --border-main: #CBD5E1;
+    --border-card: #E2E8F0;
+    --border-accent: #0891B2;
+    --text-primary: #0F172A;
+    --text-secondary: #334155;
+    --text-muted: #64748B;
+    --cyan-primary: #0891B2;
+    --cyan-glow: #06B6D4;
+    --cyan-light: #E0F2FE;
+    --gold-accent: #D97706;
+    --gold-light: #FEF3C7;
+    --emerald-accent: #059669;
+    --emerald-light: #ECFDF5;
+    --copper-accent: #C2410C;
+    --copper-light: #FFEDD5;
+  }
+
+  html.dark, :root.dark {
+    /* Modo Oscuro Tecnológico Azul Cián & Minero */
+    color-scheme: dark;
+    --bg-root: #050B11;
+    --bg-surface: #0A1622;
+    --bg-card: #0F2232;
+    --bg-muted: #162E44;
+    --border-main: #1A364E;
+    --border-card: #152E42;
+    --border-accent: #06B6D4;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+    --cyan-primary: #06B6D4;
+    --cyan-glow: #22D3EE;
+    --cyan-light: rgba(6, 182, 212, 0.15);
+    --gold-accent: #F59E0B;
+    --gold-light: rgba(245, 158, 11, 0.15);
+    --emerald-accent: #10B981;
+    --emerald-light: rgba(16, 185, 129, 0.15);
+    --copper-accent: #F97316;
+    --copper-light: rgba(249, 115, 22, 0.15);
+  }
+
+  html {
+    font-size: 16px;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg-root);
+    color: var(--text-primary);
+    overflow-x: hidden;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  html.dark input,
+  html.dark select,
+  html.dark textarea {
+    color-scheme: dark;
+  }
+
+  html.dark select option {
+    background-color: #0A1622;
+    color: #F8FAFC;
+  }
+
+  /* Tipografía Profesional Minera y Corporativa */
+  .font-display {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+  }
+
+  .font-mono-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Escala Tipográfica Amigable y Legible para el Cliente (Cero Letras Diminutas) */
+.text-\[9px\],
+.text-\[10px\] {
+  font-size: 0.8125rem !important;
+  line-height: 1.25rem !important;
+}
+
+.text-\[11px\],
+.text-xs {
+  font-size: 0.9rem !important;
+  line-height: 1.375rem !important;
+}
+
+.text-sm {
+  font-size: 1rem !important;
+  line-height: 1.5rem !important;
+}
+
+.text-base {
+  font-size: 1.08rem !important;
+  line-height: 1.6rem !important;
+}
+
+table th {
+  font-size: 0.85rem !important;
+  padding-top: 0.85rem !important;
+  padding-bottom: 0.85rem !important;
+}
+
+table td {
+  font-size: 0.95rem !important;
+}
+
+input,
+select,
+textarea {
+  font-size: 0.95rem !important;
+}
+
+/* Badges Semánticos por Mineral y Estado */
+.badge-mineral-au {
+  background-color: rgba(245, 158, 11, 0.16);
+  color: #B45309;
+  border-color: rgba(245, 158, 11, 0.45);
+}
+html.dark .badge-mineral-au {
+  color: #FBBF24;
+}
+
+.badge-mineral-sn {
+  background-color: rgba(16, 185, 129, 0.16);
+  color: #047857;
+  border-color: rgba(16, 185, 129, 0.45);
+}
+html.dark .badge-mineral-sn {
+  color: #34D399;
+}
+
+.badge-mineral-ag {
+  background-color: rgba(139, 92, 246, 0.16);
+  color: #6D28D9;
+  border-color: rgba(139, 92, 246, 0.45);
+}
+html.dark .badge-mineral-ag {
+  color: #C4B5FD;
+}
+
+.badge-mineral-zn {
+  background-color: rgba(6, 182, 212, 0.16);
+  color: #0E7490;
+  border-color: rgba(6, 182, 212, 0.45);
+}
+html.dark .badge-mineral-zn {
+  color: #22D3EE;
+}
+
+.badge-mineral-pb {
+  background-color: rgba(99, 102, 241, 0.16);
+  color: #4338CA;
+  border-color: rgba(99, 102, 241, 0.45);
+}
+html.dark .badge-mineral-pb {
+  color: #A5B4FC;
+}
+
+.badge-mineral-cu {
+  background-color: rgba(249, 115, 22, 0.16);
+  color: #C2410C;
+  border-color: rgba(249, 115, 22, 0.45);
+}
+html.dark .badge-mineral-cu {
+  color: #FB923C;
+}
+
+/* Custom Scrollbar Tecnológico */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-accent);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cyan-glow);
+}
+
+/* Utilitarios Tecnológicos de Alta Precisión */
+.cyan-glow {
+  box-shadow: 0 0 25px -4px rgba(6, 182, 212, 0.35);
+}
+
+.gold-glow {
+  box-shadow: 0 0 25px -4px rgba(245, 158, 11, 0.35);
+}
+
+.tech-grid-pattern {
+  background-image: radial-gradient(rgba(6, 182, 212, 0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Densidad visual configurable: Cómodo vs Compacto */
+.density-compact table th,
+.density-compact table td {
+  padding-top: 0.45rem !important;
+  padding-bottom: 0.45rem !important;
+}
+
+.density-comfortable table th,
+.density-comfortable table td {
+  padding-top: 0.8rem !important;
+  padding-bottom: 0.8rem !important;
+}
+
+/* Soporte estricto para accesibilidad de movimiento */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Estilos de impresión limpios para reportes de venta */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

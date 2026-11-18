@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>MineralFlow — Composición Oficial HyperFrames (5 Escenas)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=JetBrains+Mono:wght@600;700&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: #1c1917;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: #1c1917;
+      }
+      #stage-wrapper {
+        width: 1280px;
+        height: 720px;
+        position: relative;
+        overflow: hidden;
+        border-radius: 16px;
+        border: 2px solid #d4b475;
+        background: #faf8f4;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+      }
+      #root {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        background: radial-gradient(circle at 80% 20%, #f3efe6 0%, #faf8f4 70%);
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+        padding: 64px 80px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .eyebrow {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: #b85d3b;
+        font-weight: 700;
+      }
+      .headline {
+        font-family: 'Instrument Serif', serif;
+        font-size: 64px;
+        line-height: 1.05;
+        color: #1c1917;
+        margin-top: 8px;
+      }
+      .subline {
+        font-size: 20px;
+        color: #57534e;
+        max-width: 780px;
+        margin-top: 10px;
+      }
+      .crystal-grid {
+        display: flex;
+        gap: 32px;
+        margin: auto 0;
+      }
+      .crystal-card {
+        flex: 1;
+        background: #ffffff;
+        border: 1.5px solid #d4b475;
+        border-radius: 20px;
+        padding: 28px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-shadow: 0 10px 24px rgba(28, 25, 23, 0.05);
+      }
+      .lot-grid {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        gap: 12px;
+        margin: auto 0;
+      }
+      .lot-block {
+        background: #ffffff;
+        border: 1.5px solid #1e4d3b;
+        border-radius: 10px;
+        padding: 12px 10px;
+        text-align: center;
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .kpi-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 28px;
+        margin: auto 0;
+      }
+      .kpi-box {
+        background: #ffffff;
+        border: 2px solid #d4b475;
+        border-radius: 20px;
+        padding: 32px;
+      }
+      .kpi-box.primary {
+        background: #1e4d3b;
+        color: #faf8f4;
+        border-color: #1e4d3b;
+      }
+      .kpi-val {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 48px;
+        font-weight: 700;
+        margin-top: 12px;
+      }
+      #controls {
+        margin-top: 16px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        color: #faf8f4;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 13px;
+      }
+      button.ctrl-btn {
+        background: #1e4d3b;
+        color: #ffffff;
+        border: 1px solid #d4b475;
+        padding: 8px 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage-wrapper">
+      <div
+        id="root"
+        data-composition-id="mineralflow-launch"
+        data-duration="15"
+        data-fps="30"
+        data-width="1920"
+        data-height="1080"
+      >
+        <!-- ESCENA 1: Figuras geométricas inspiradas en minerales -->
+        <div
+          id="scene-1"
+          class="clip"
+          data-start="0"
+          data-duration="3"
+          data-track-index="1"
+          data-track-kind="graphics"
+        >
+          <div id="s1-header">
+            <div class="eyebrow">ESCENA 01 · ORIGEN GEOLÓGICO Y TRAZABILIDAD</div>
+            <h1 class="headline">Riqueza mineral andina con precisión técnica.</h1>
+            <p class="subline">
+              Identificación por mina de origen, cooperativa y leyes químicas certificadas.
+            </p>
+          </div>
+          <div class="crystal-grid" id="s1-crystals">
+            <div class="crystal-card">
+              <svg width="88" height="88" viewBox="0 0 64 64">
+                <polygon
+                  points="32,4 54,18 48,48 32,60 16,48 10,18"
+                  fill="#1E4D3B"
+                  fill-opacity="0.2"
+                  stroke="#1E4D3B"
+                  stroke-width="2.5"
+                />
+              </svg>
+              <strong style="margin-top: 12px; font-size: 20px">Zinc (Zn) · %</strong>
+            </div>
+            <div class="crystal-card">
+              <svg width="88" height="88" viewBox="0 0 64 64">
+                <polygon
+                  points="32,6 56,24 44,56 20,56 8,24"
+                  fill="#C59B47"
+                  fill-opacity="0.28"
+                  stroke="#C59B47"
+                  stroke-width="2.5"
+                />
+              </svg>
+              <strong style="margin-top: 12px; font-size: 20px">Plata (Ag) · DM / g/t</strong>
+            </div>
+            <div class="crystal-card">
+              <svg width="88" height="88" viewBox="0 0 64 64">
+                <polygon
+                  points="32,4 52,16 52,46 32,60 12,46 12,16"
+                  fill="#B85D3B"
+                  fill-opacity="0.22"
+                  stroke="#B85D3B"
+                  stroke-width="2.5"
+                />
+              </svg>
+              <strong style="margin-top: 12px; font-size: 20px">Estaño (Sn) · %</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- ESCENA 2: Lotes que ingresan al almacén -->
+        <div
+          id="scene-2"
+          class="clip"
+          data-start="3"
+          data-duration="3"
+          data-track-index="1"
+          data-track-kind="graphics"
+        >
+          <div id="s2-header">
+            <div class="eyebrow">ESCENA 02 · RECEPCIÓN EN ALMACÉN</div>
+            <h1 class="headline">Lotes verificados en estado DISPONIBLE.</h1>
+            <p class="subline">
+              Cada compra registra uno o múltiples lotes con sacos, peso neto y leyes individuales.
+            </p>
+          </div>
+          <div class="lot-grid" id="s2-lots">
+            <div class="lot-block"><strong>LT-0101</strong><br />1.250 kg</div>
+            <div class="lot-block"><strong>LT-0102</strong><br />1.480 kg</div>
+            <div class="lot-block"><strong>LT-0103</strong><br />1.120 kg</div>
+            <div class="lot-block"><strong>LT-0104</strong><br />1.640 kg</div>
+            <div class="lot-block"><strong>LT-0105</strong><br />1.900 kg</div>
+            <div class="lot-block"><strong>LT-0106</strong><br />1.350 kg</div>
+            <div class="lot-block"><strong>LT-0107</strong><br />1.720 kg</div>
+            <div class="lot-block"><strong>LT-0108</strong><br />1.510 kg</div>
+          </div>
+        </div>
+
+        <!-- ESCENA 3: Agrupación visual de lotes -->
+        <div
+          id="scene-3"
+          class="clip"
+          data-start="6"
+          data-duration="3"
+          data-track-index="1"
+          data-track-kind="graphics"
+        >
+          <div id="s3-header">
+            <div class="eyebrow">ESCENA 03 · SELECCIÓN INTELIGENTE MULTILOTE</div>
+            <h1 class="headline">Agrupación ágil de 40 o más lotes.</h1>
+            <p class="subline">
+              Selección por rango con Shift + Clic, filtros combinados y vista exclusiva de seleccionados.
+            </p>
+          </div>
+          <div
+            id="s3-group-box"
+            style="
+              margin: auto 0;
+              background: #1e4d3b;
+              color: #faf8f4;
+              padding: 36px;
+              border-radius: 24px;
+              border: 2px solid #d4b475;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+            "
+          >
+            <div>
+              <div style="font-size: 14px; color: #d4b475; font-weight: 700">
+                GRUPO CONSOLIDADO PARA DESPACHO
+              </div>
+              <div style="font-size: 44px; font-weight: 800; margin-top: 6px">
+                40 Lotes Disponibles Agrupados
+              </div>
+            </div>
+            <div
+              style="
+                font-family: 'JetBrains Mono', monospace;
+                font-size: 28px;
+                background: #faf8f4;
+                color: #1e4d3b;
+                padding: 16px 28px;
+                border-radius: 16px;
+                font-weight: 700;
+              "
+            >
+              SHIFT + CLIC ACTIVO
+            </div>
+          </div>
+        </div>
+
+        <!-- ESCENA 4: Indicadores de sacos, peso y ley promedio -->
+        <div
+          id="scene-4"
+          class="clip"
+          data-start="9"
+          data-duration="3"
+          data-track-index="1"
+          data-track-kind="graphics"
+        >
+          <div id="s4-header">
+            <div class="eyebrow">ESCENA 04 · MOTOR DE CÁLCULO EN TIEMPO REAL</div>
+            <h1 class="headline">Promedio ponderado exacto por peso.</h1>
+            <p class="subline">
+              Fórmula: Σ(Peso del lote × Ley del lote) / Σ(Peso de los lotes incluidos).
+            </p>
+          </div>
+          <div class="kpi-row" id="s4-kpis">
+            <div class="kpi-box">
+              <div class="eyebrow">TOTAL DE SACOS</div>
+              <div class="kpi-val">800 sacos</div>
+            </div>
+            <div class="kpi-box">
+              <div class="eyebrow">PESO NETO TOTAL</div>
+              <div class="kpi-val">40.000 kg</div>
+            </div>
+            <div class="kpi-box primary">
+              <div class="eyebrow" style="color: #d4b475">LEY PROMEDIO PONDERADA</div>
+              <div class="kpi-val">46,67% Zn</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ESCENA 5: Cierre de venta y marca MineralFlow -->
+        <div
+          id="scene-5"
+          class="clip"
+          data-start="12"
+          data-duration="3"
+          data-track-index="1"
+          data-track-kind="graphics"
+        >
+          <div
+            id="s5-finale"
+            style="
+              margin: auto;
+              text-align: center;
+              background: #ffffff;
+              border: 2px solid #d4b475;
+              padding: 56px 80px;
+              border-radius: 28px;
+              box-shadow: 0 20px 50px rgba(28, 25, 23, 0.08);
+            "
+          >
+            <div class="eyebrow">ESCENA 05 · TRANSACCIÓN ATÓMICA CONFIRMADA</div>
+            <h1 class="headline" style="font-size: 84px; margin-top: 12px">MineralFlow</h1>
+            <p style="font-size: 22px; color: #1e4d3b; font-weight: 700; margin-top: 8px">
+              Gestión Inteligente de Lotes Mineros · Bolivia
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="controls">
+      <button class="ctrl-btn" id="btn-play">Reproducir / Pausar</button>
+      <button class="ctrl-btn" id="btn-restart">Reiniciar (0.0s)</button>
+      <span id="time-readout">T = 0.00s / 15.00s</span>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({
+        paused: true,
+        onUpdate: () => {
+          const t = tl.time();
+          document.getElementById('time-readout').textContent = `T = ${t.toFixed(2)}s / 15.00s`;
+          // Mostrar únicamente el clip activo según [start, start + duration)
+          document.querySelectorAll('.clip').forEach((el) => {
+            const s = parseFloat(el.getAttribute('data-start'));
+            const d = parseFloat(el.getAttribute('data-duration'));
+            el.style.opacity = t >= s && t < s + d || (s === 12 && t >= 12) ? '1' : '0';
+            el.style.pointerEvents = t >= s && t < s + d ? 'auto' : 'none';
+          });
+        },
+      });
+
+      // Animaciones determinísticas sobre hijos (respetando el contrato HyperFrames)
+      tl.fromTo('#s1-header', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: 'power4.out' }, 0)
+        .fromTo('#s1-crystals .crystal-card', { y: 30, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.1, duration: 0.5, ease: 'power3.out' }, 0.2)
+        .fromTo('#s2-header', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: 'power4.out' }, 3.0)
+        .fromTo('#s2-lots .lot-block', { scale: 0.88, opacity: 0 }, { scale: 1, opacity: 1, stagger: 0.05, duration: 0.4, ease: 'power3.out' }, 3.2)
+        .fromTo('#s3-header', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: 'power4.out' }, 6.0)
+        .fromTo('#s3-group-box', { scale: 0.92, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.55, ease: 'power3.out' }, 6.25)
+        .fromTo('#s4-header', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.45, ease: 'power4.out' }, 9.0)
+        .fromTo('#s4-kpis .kpi-box', { y: 28, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.1, duration: 0.5, ease: 'power3.out' }, 9.2)
+        .fromTo('#s5-finale', { scale: 0.94, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: 'power4.out' }, 12.0)
+        .to('#s5-finale', { scale: 1, duration: 2.4 }, 12.6);
+
+      window.__timelines['mineralflow-launch'] = tl;
+      tl.seek(0);
+      tl.play();
+
+      document.getElementById('btn-play').addEventListener('click', () => {
+        if (tl.isActive()) tl.pause();
+        else tl.play();
+      });
+      document.getElementById('btn-restart').addEventListener('click', () => {
+        tl.restart();
+      });
+    </script>
+  </body>
+</html>
+

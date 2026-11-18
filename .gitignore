@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# PostgreSQL local cluster data
+.pgdata/
+*/.pgdata/
+*.log
+
+# Environment variables & secrets (use .env.example instead)
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+
+# Production builds
+dist/
+build/
+*/dist/
+*/build/
+
+# Testing & coverage
+coverage/
+*/coverage/
+test-results/
+*/test-results/
+playwright-report/
+*/playwright-report/
+.nyc_output/
+
+# Bundler cache
+.vite/
+*/.vite/
+.turbo/
+.cache/
+
+# Scratch & temporary helper files
+scratch/
+*/scratch/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo

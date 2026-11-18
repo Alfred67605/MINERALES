@@ -1,0 +1,166 @@
+import { test, expect } from '@playwright/test';
+import { execSync } from 'child_process';
+
+test.describe('Suite E2E Integral — MineralFlow 2.0 (3D, Fallback 2D, Laboratorio, Trazabilidad y Venta de 40 Lotes)', () => {
+  test.beforeAll(async () => {
+    try {
+      execSync('npx tsx scripts/reset_lots.ts', { cwd: '../backend', stdio: 'ignore' });
+    } catch {}
+  });
+
+  test('Verifica todas las pantallas renovadas, escenas 3D y fallback 2D, selección masiva (Shift+Clic y 40 lotes), laboratorio, trazabilidad M-02, HyperFrames en /acerca y responsive (1720px, 1440px, 1366px y 375px)', async ({
+    page,
+  }) => {
+    const consoleErrors: string[] = [];
+    page.on('console', (msg) => {
+      console.log('BROWSER CONSOLE:', msg.type(), msg.text());
+      if (msg.type() === 'error') {
+        consoleErrors.push(msg.text());
+      }
+    });
+    page.on('pageerror', (err) => {
+      console.log('BROWSER PAGEERROR:', err.message);
+      consoleErrors.push(`PAGEERROR: ${err.message}`);
+    });
+
+    // 1. Iniciar en resolución 1720px, verificar Modo Oscuro Azul Cian activo y autenticar usuario real sin sufijos "(DEMO)"
+    await page.setViewportSize({ width: 1720, height: 960 });
+    await page.goto('/');
+    await expect(page.locator('html')).toHaveClass(/dark/);
+    await expect(page.getByRole('button', { name: /Ingresar a MineralFlow/i })).toBeVisible();
+    await page.getByRole('button', { name: /Ingresar a MineralFlow/i }).click();
+
+    // 2. Verificar Resumen General del Negocio y Vista 3D
+    await expect(
+      page.getByRole('heading', { name: /Control de Compras, Almacén y Ventas de Minerales/i })
+    ).toBeVisible();
+    await expect(
+      page.getByText(/Vista 3D · Resumen de Tu Almacén y Ventas/i)
+    ).toBeVisible();
+    await expect(page.getByText('Lotes Disponibles en Almacén', { exact: true })).toBeVisible();
+    await page.screenshot({ path: '../docs/evidence_01_dashboard_3d.png', fullPage: true });
+
+    // 3. Navegar a Mi Almacén (Vista 3D + Movimientos de Almacén)
+    await page.getByRole('link', { name: /Mi Almacén/i }).click();
+    await expect(page.getByRole('heading', { name: 'Mi Almacén de Minerales' })).toBeVisible();
+    await expect(
+      page.getByText(/VISUALIZACIÓN POR TAMAÑO Y TIPO DE MINERAL/i)
+    ).toBeVisible();
+    await page.screenshot({ path: '../docs/evidence_02_almacen_3d.png', fullPage: true });
+
+    // Verificar pestaña de Movimientos de Almacén
+    await page.getByRole('button', { name: /Movimientos de Almacén/i }).click();
+    await expect(page.getByText(/Historial de Movimientos de Almacén/i)).toBeVisible();
+    await page.getByRole('button', { name: /Lotes Guardados/i }).click();
+
+    // 4. Navegar a Leyes de Laboratorio
+    await page.getByRole('link', { name: /Leyes de Laboratorio/i }).click();
+    await expect(
+      page.getByRole('heading', { name: 'Laboratorio y Análisis Mineralógico' })
+    ).toBeVisible();
+    await expect(page.getByText(/CERT-LAB-/i).first()).toBeVisible();
+    await page.screenshot({ path: '../docs/evidence_03_laboratorio.png', fullPage: true });
+
+    // 5. Navegar a Seguimiento de Lotes
+    await page.getByRole('link', { name: /Seguimiento de Lotes/i }).click();
+    await expect(
+      page.getByRole('heading', { name: /Seguimiento de Lotes/i })
+    ).toBeVisible();
+    await expect(page.getByText(/01 · ORIGEN MINERO/i)).toBeVisible();
+    await page.screenshot({ path: '../docs/evidence_04_trazabilidad_m02.png', fullPage: true });
+
+    // 6. Navegar a Guía del Sistema y verificar HyperFrames
+    await page.getByRole('link', { name: /Guía del Sistema/i }).click();
+    await expect(
+      page.getByRole('heading', { name: /Guía de Uso — MineralFlow 2.0/i })
+    ).toBeVisible();
+    await page.getByTestId('btn-abrir-hyperframes-acerca').click();
+    await expect(page.getByText(/ESCENA 1 DE 5/i)).toBeVisible();
+    await page.getByRole('button', { name: /Cerrar presentación/i }).click();
+
+    // 7. Navegar a Vender Lotes (Vista 3D, Shift+Clic, 40 lotes y Fallback 2D)
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.getByRole('link', { name: /Vender Lotes/i }).click();
+    await expect(
+      page.getByRole('heading', { name: 'Selección Inteligente de Lotes para Vender' })
+    ).toBeVisible();
+
+    // Selección por rango con Shift + Clic (LT-2026-0101 a LT-2026-0105 = 5 lotes)
+    await page.getByTestId('fila-lote-LT-2026-0101').click();
+    await expect(page.getByTestId('resumen-total-lotes')).toHaveText('1');
+    await page.getByTestId('fila-lote-LT-2026-0105').click({ modifiers: ['Shift'] });
+    await expect(page.getByTestId('resumen-total-lotes')).toHaveText('5');
+
+    // Limpiar y seleccionar 40 lotes
+    await page.getByTestId('btn-limpiar-seleccion').click();
+    await page.getByTestId('btn-seleccionar-40').click();
+    await expect(page.getByTestId('resumen-total-lotes')).toHaveText('40');
+    await page.screenshot({ path: '../docs/evidence_05_seleccion_3d_40lotes.png', fullPage: true });
+
+    // Probar Prueba Específica 10: Desactivar 3D (Modo 2D) y verificar que la venta sigue funcionando al 100%
+    await page.getByTestId('btn-toggle-3d').click();
+    await expect(page.getByText(/Bandeja de Consolidación \(Modo 2D\): 40 lotes/i)).toBeVisible();
+
+    // Activar "VER SOLO SELECCIONADOS"
+    await page.getByTestId('btn-ver-solo-seleccionados').click();
+    await expect(page.getByText(/Revisando grupo seleccionado: 40 lote/i)).toBeVisible();
+
+    // Confirmar y cerrar la venta atómica de los 40 lotes
+    await page.getByTestId('btn-continuar-venta').click();
+    await expect(
+      page.getByRole('heading', { name: /Confirmación y Cierre de Venta de Minerales/i })
+    ).toBeVisible();
+    await page.getByTestId('btn-confirmar-cierre-venta').click();
+    await expect(page.getByText(/registrada y cerrada con éxito!/i)).toBeVisible();
+
+    // Reactivar 3D para dejar la preferencia encendida
+    await page.getByTestId('btn-toggle-3d').click();
+
+    // 8. Verificar Módulo de Precios de Minerales (Oficial Quincenal, En Vivo y Manual) y Modo Oscuro Azul Cian
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.getByRole('link', { name: /Precios de Minerales/i }).click();
+    await expect(
+      page.getByRole('heading', { name: /Precios de Minerales y Calculadora de Pago/i })
+    ).toBeVisible();
+
+    // Asegurar modo Oficial Quincenal y verificar valores oficiales (segunda imagen SENARECOM Noviembre 2026)
+    await page.getByTestId('btn-modo-oficial').click();
+    await expect(page.getByText('4.010,22').first()).toBeVisible();
+    await expect(page.getByText('1,73').first()).toBeVisible();
+
+    // Probar cambio a Modo En Vivo
+    await page.getByTestId('btn-modo-envivo').click();
+    await expect(page.getByText(/EN_VIVO/i).first()).toBeVisible();
+
+    // Probar cambio a Modo Manual / Personalizado y Simulador Manual
+    await page.getByTestId('btn-modo-manual').click();
+    await expect(page.getByText(/MANUAL/i).first()).toBeVisible();
+    await expect(page.getByTestId('input-sim-precio-manual')).toBeVisible();
+
+    // Capturar evidencia en Modo Oscuro Azul Cián Tecnológico
+    await expect(page.locator('html')).toHaveClass(/dark/);
+    await page.screenshot({ path: '../docs/evidence_07_cotizaciones_dark_cyan.png', fullPage: true });
+
+    // Probar alternancia a Modo Claro y captura comparativa, luego volver a Oscuro
+    await page.getByTestId('btn-toggle-theme').click();
+    await expect(page.locator('html')).not.toHaveClass(/dark/);
+    await page.screenshot({ path: '../docs/evidence_08_cotizaciones_light.png', fullPage: true });
+    await page.getByTestId('btn-toggle-theme').click();
+    await expect(page.locator('html')).toHaveClass(/dark/);
+
+    // 9. Verificar Ventas Realizadas y Expediente de los 40 lotes vendidos
+    await page.setViewportSize({ width: 1366, height: 768 });
+    await page.getByRole('link', { name: /Ventas Realizadas/i }).click();
+    await expect(page.getByText('VTA-2026-0003')).toBeVisible();
+    await page.getByTestId('btn-detalle-venta-VTA-2026-0003').click();
+    await expect(page.getByText(/Detalle de Lotes Vendidos \(40 Lotes\)/i)).toBeVisible();
+    await page.screenshot({ path: '../docs/evidence_06_expediente_venta.png', fullPage: true });
+    await page.getByRole('button', { name: 'Cerrar detalle de venta' }).click();
+
+    // 10. Verificar vista móvil responsive (375px)
+    await page.setViewportSize({ width: 375, height: 812 });
+    await expect(page.getByRole('button', { name: 'Abrir menú de navegación' })).toBeVisible();
+
+    expect(consoleErrors).toEqual([]);
+  });
+});

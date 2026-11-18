@@ -1,0 +1,444 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RolUsuario {
+  ADMINISTRADOR
+  ALMACENERO
+  VENDEDOR
+  LABORATORIO
+  CONSULTA
+}
+
+enum EstadoRegistro {
+  ACTIVO
+  INACTIVO
+}
+
+enum EstadoLote {
+  BORRADOR
+  PENDIENTE_ANALISIS
+  APROBADO
+  RESERVADO
+  DISPONIBLE
+  VENDIDO
+}
+
+enum UnidadPeso {
+  KG
+  TM
+}
+
+enum EstadoVenta {
+  CONFIRMADA
+  ANULADA
+}
+
+enum TipoEnsaye {
+  PROVISIONAL
+  FINAL
+  LABORATORIO_EXTERNO
+  DIRIMENCIA
+}
+
+enum EstadoMedicionLey {
+  MEDIDO
+  SIN_DATO
+  NO_MEDIDO
+  BAJO_LIMITE_DETECCION
+  CERO_MEDIDO
+  VALIDADO
+}
+
+enum EstadoDocumentoNormativo {
+  PENDIENTE
+  RECIBIDO
+  VERIFICADO
+}
+
+model Usuario {
+  id           String         @id @default(uuid())
+  nombre       String
+  email        String         @unique
+  username     String         @unique
+  hashPassword String         @map("hash_password")
+  rol          RolUsuario     @default(ALMACENERO)
+  estado       EstadoRegistro @default(ACTIVO)
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  compras      Compra[]
+  lotes        Lote[]
+  ventas       Venta[]
+  auditorias   Auditoria[]
+
+  @@map("usuarios")
+}
+
+model Proveedor {
+  id               String         @id @default(uuid())
+  codigo           String         @unique
+  nombre           String
+  minaOrigen       String?        @map("mina_origen")
+  nimNiar          String?        @map("nim_niar")
+  municipio        String?
+  departamento     String?        @default("Potosí")
+  telefono         String?
+  observaciones    String?
+  estado           EstadoRegistro @default(ACTIVO)
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+
+  compras          Compra[]
+  lotes            Lote[]
+  minas            Mina[]
+
+  @@index([estado])
+  @@index([nombre])
+  @@map("proveedores")
+}
+
+model Mina {
+  id            String         @id @default(uuid())
+  codigo        String         @unique
+  nombre        String
+  localidad     String
+  departamento  String         @default("Potosí")
+  proveedorId   String?        @map("proveedor_id")
+  estado        EstadoRegistro @default(ACTIVO)
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  proveedor     Proveedor?     @relation(fields: [proveedorId], references: [id])
+  lotes         Lote[]
+
+  @@index([proveedorId])
+  @@map("minas")
+}
+
+model Comprador {
+  id             String         @id @default(uuid())
+  codigo         String         @unique
+  nombre         String
+  identificacion String?        // NIT o identificación opcional
+  nimComprador   String?        @map("nim_comprador")
+  paisDestino    String?        @default("Bolivia") @map("pais_destino")
+  telefono       String?
+  direccion      String?
+  observaciones  String?
+  estado         EstadoRegistro @default(ACTIVO)
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  ventas         Venta[]
+
+  @@index([estado])
+  @@index([nombre])
+  @@map("compradores")
+}
+
+model CatalogoLey {
+  id             String         @id @default(uuid())
+  codigo         String         @unique // Ej: "ZN_PCT", "AG_DM", "AG_GT", "SN_PCT", "PB_PCT"
+  mineral        String         // Ej: "Zinc", "Plata", "Estaño", "Plomo"
+  simbolo        String         // Ej: "Zn", "Ag", "Sn", "Pb", "Cu", "Sb"
+  nombreLey      String         @map("nombre_ley")
+  unidadMedida   String         @map("unidad_medida") // Ej: "%", "DM", "g/t"
+  valorMinimo    Decimal        @default(0) @map("valor_minimo") @db.Decimal(14, 4)
+  valorMaximo    Decimal        @default(100) @map("valor_maximo") @db.Decimal(14, 4)
+  decimales      Int            @default(2)
+  estado         EstadoRegistro @default(ACTIVO)
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  analisisLotes  LoteLey[]
+
+  @@map("catalogo_leyes")
+}
+
+model UbicacionAlmacen {
+  id              String         @id @default(uuid())
+  codigo          String         @unique // Ej: "ZONA-A1", "ZONA-B2"
+  nombre          String
+  zona            String
+  capacidadKg     Decimal        @default(50000) @map("capacidad_kg") @db.Decimal(14, 4)
+  esConceptual    Boolean        @default(true) @map("es_conceptual")
+  estado          EstadoRegistro @default(ACTIVO)
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  lotes           Lote[]
+
+  @@map("ubicaciones_almacen")
+}
+
+model Compra {
+  id                String                    @id @default(uuid())
+  numeroCompra      String                    @unique @map("numero_compra")
+  fecha             DateTime
+  proveedorId       String                    @map("proveedor_id")
+  usuarioId         String                    @map("usuario_id")
+  boletoPesaje      String?                   @map("boleto_pesaje")
+  guiaRemision      String?                   @map("guia_remision")
+  expedienteM02     String?                   @map("expediente_m02")
+  estadoM02         EstadoDocumentoNormativo  @default(RECIBIDO) @map("estado_m02")
+  nimOperador       String?                   @map("nim_operador")
+  observaciones     String?
+  createdAt         DateTime                  @default(now()) @map("created_at")
+  updatedAt         DateTime                  @updatedAt @map("updated_at")
+
+  proveedor         Proveedor                 @relation(fields: [proveedorId], references: [id])
+  usuario           Usuario                   @relation(fields: [usuarioId], references: [id])
+  lotes             Lote[]
+  documentos        DocumentoCumplimiento[]
+
+  @@index([fecha])
+  @@index([proveedorId])
+  @@map("compras")
+}
+
+model Lote {
+  id                 String              @id @default(uuid())
+  numeroLote         String              @unique @map("numero_lote")
+  compraId           String              @map("compra_id")
+  proveedorId        String              @map("proveedor_id")
+  minaId             String?             @map("mina_id")
+  ubicacionId        String?             @map("ubicacion_id")
+  usuarioId          String              @map("usuario_id")
+  fechaCompra        DateTime            @map("fecha_compra")
+  minaOrigen         String?             @map("mina_origen")
+  cantidadSacos      Int                 @map("cantidad_sacos")
+  pesoBrutoHumedo    Decimal?            @map("peso_bruto_humedo") @db.Decimal(14, 4)
+  pesoTara           Decimal?            @default(0) @map("peso_tara") @db.Decimal(14, 4)
+  pesoNeto           Decimal             @map("peso_neto") @db.Decimal(14, 4)
+  pesoSeco           Decimal?            @map("peso_seco") @db.Decimal(14, 4)
+  humedadPct         Decimal?            @default(0) @map("humedad_pct") @db.Decimal(6, 2)
+  metodoHumedad      String?             @default("ISO 10251") @map("metodo_humedad")
+  metodoMuestreo     String?             @default("ISO 12743") @map("metodo_muestreo")
+  boletoPesaje       String?             @map("boleto_pesaje")
+  unidadPeso         UnidadPeso          @default(KG) @map("unidad_peso")
+  tipoMineral        String              @map("tipo_mineral")
+  estado             EstadoLote          @default(DISPONIBLE)
+  observaciones      String?
+  createdAt          DateTime            @default(now()) @map("created_at")
+  updatedAt          DateTime            @updatedAt @map("updated_at")
+
+  compra             Compra              @relation(fields: [compraId], references: [id])
+  proveedor          Proveedor           @relation(fields: [proveedorId], references: [id])
+  mina               Mina?               @relation(fields: [minaId], references: [id])
+  ubicacion          UbicacionAlmacen?   @relation(fields: [ubicacionId], references: [id])
+  usuario            Usuario             @relation(fields: [usuarioId], references: [id])
+  leyes              LoteLey[]
+  detalleVenta       DetalleVenta?
+  movimientos        MovimientoInventario[]
+  documentos         DocumentoCumplimiento[]
+
+  @@index([estado])
+  @@index([fechaCompra])
+  @@index([proveedorId])
+  @@index([tipoMineral])
+  @@map("lotes")
+}
+
+model LoteLey {
+  id                  String             @id @default(uuid())
+  loteId              String             @map("lote_id")
+  catalogoLeyId       String             @map("catalogo_ley_id")
+  valor               Decimal            @db.Decimal(14, 4)
+  tipoEnsaye          TipoEnsaye         @default(FINAL) @map("tipo_ensaye")
+  estadoMedicion      EstadoMedicionLey  @default(VALIDADO) @map("estado_medicion")
+  laboratorio         String?            @default("Laboratorio Químico MineralFlow — Potosí")
+  nroCertificado      String?            @map("nro_certificado")
+  metodoAnalisis      String?            @default("Volumetría / Absorción Atómica") @map("metodo_analisis")
+  versionActual       Int                @default(1) @map("version_actual")
+  validadoPor         String?            @map("validado_por")
+  fechaEnsaye         DateTime           @default(now()) @map("fecha_ensaye")
+  createdAt           DateTime           @default(now()) @map("created_at")
+  updatedAt           DateTime           @updatedAt @map("updated_at")
+
+  lote                Lote               @relation(fields: [loteId], references: [id], onDelete: Cascade)
+  catalogoLey         CatalogoLey        @relation(fields: [catalogoLeyId], references: [id])
+  versiones           EnsayeVersion[]
+
+  @@unique([loteId, catalogoLeyId])
+  @@index([loteId])
+  @@map("lote_leyes")
+}
+
+model EnsayeVersion {
+  id              String            @id @default(uuid())
+  loteLeyId       String            @map("lote_ley_id")
+  version         Int
+  valor           Decimal           @db.Decimal(14, 4)
+  tipoEnsaye      TipoEnsaye        @map("tipo_ensaye")
+  estadoMedicion  EstadoMedicionLey @map("estado_medicion")
+  laboratorio     String?
+  nroCertificado  String?           @map("nro_certificado")
+  motivoCambio    String?           @map("motivo_cambio")
+  usuarioNombre   String            @map("usuario_nombre")
+  createdAt       DateTime          @default(now()) @map("created_at")
+
+  loteLey         LoteLey           @relation(fields: [loteLeyId], references: [id], onDelete: Cascade)
+
+  @@index([loteLeyId])
+  @@map("ensaye_versiones")
+}
+
+model MovimientoInventario {
+  id                String     @id @default(uuid())
+  loteId            String     @map("lote_id")
+  tipoMovimiento    String     @map("tipo_movimiento") // RECEPCION, CAMBIO_UBICACION, RESERVA, SALIDA_VENTA, AJUSTE_AUDITADO
+  ubicacionOrigen   String?    @map("ubicacion_origen")
+  ubicacionDestino  String?    @map("ubicacion_destino")
+  sacosAntes        Int        @map("sacos_antes")
+  sacosDespues      Int        @map("sacos_despues")
+  pesoKgAntes       Decimal    @map("peso_kg_antes") @db.Decimal(14, 4)
+  pesoKgDespues     Decimal    @map("peso_kg_despues") @db.Decimal(14, 4)
+  motivo            String?
+  usuarioNombre     String     @map("usuario_nombre")
+  fechaHora         DateTime   @default(now()) @map("fecha_hora")
+
+  lote              Lote       @relation(fields: [loteId], references: [id], onDelete: Cascade)
+
+  @@index([loteId])
+  @@index([fechaHora])
+  @@map("movimientos_inventario")
+}
+
+model Venta {
+  id                      String                   @id @default(uuid())
+  numeroVenta             String                   @unique @map("numero_venta")
+  idempotencyKey          String?                  @unique @map("idempotency_key")
+  fecha                   DateTime
+  compradorId             String                   @map("comprador_id")
+  usuarioId               String                   @map("usuario_id")
+  totalLotes              Int                      @map("total_lotes")
+  totalSacos              Int                      @map("total_sacos")
+  pesoTotalKg             Decimal                  @map("peso_total_kg") @db.Decimal(14, 4)
+  pesoTotalSecoKg         Decimal?                 @map("peso_total_seco_kg") @db.Decimal(14, 4)
+  unidadPeso              UnidadPeso               @default(KG) @map("unidad_peso")
+  criterioPeso            String                   @default("PESO_NETO_KG") @map("criterio_peso")
+  compradorNombreSnapshot String                   @map("comprador_nombre_snapshot")
+  compradorNitSnapshot    String?                  @map("comprador_nit_snapshot")
+  expedienteM02           String?                  @map("expediente_m02")
+  estadoM02               EstadoDocumentoNormativo @default(PENDIENTE) @map("estado_m02")
+  expedienteM03           String?                  @map("expediente_m03")
+  monedaReferencia        String?                  @default("BOB") @map("moneda_referencia")
+  estado                  EstadoVenta              @default(CONFIRMADA)
+  motivoAnulacion         String?                  @map("motivo_anulacion")
+  observaciones           String?
+  createdAt               DateTime                 @default(now()) @map("created_at")
+  updatedAt               DateTime                 @updatedAt @map("updated_at")
+
+  comprador               Comprador                @relation(fields: [compradorId], references: [id])
+  usuario                 Usuario                  @relation(fields: [usuarioId], references: [id])
+  detalles                DetalleVenta[]
+  resumenLeyes            ResumenLeyVenta[]
+  documentos              DocumentoCumplimiento[]
+
+  @@index([fecha])
+  @@index([compradorId])
+  @@map("ventas")
+}
+
+model DetalleVenta {
+  id                      String     @id @default(uuid())
+  ventaId                 String     @map("venta_id")
+  loteId                  String     @unique @map("lote_id")
+  numeroLoteSnapshot      String     @map("numero_lote_snapshot")
+  fechaCompraSnapshot     DateTime   @map("fecha_compra_snapshot")
+  proveedorNombreSnapshot String     @map("proveedor_nombre_snapshot")
+  minaOrigenSnapshot      String?    @map("mina_origen_snapshot")
+  tipoMineralSnapshot     String     @map("tipo_mineral_snapshot")
+  sacosRegistrados        Int        @map("sacos_registrados")
+  pesoRegistrado          Decimal    @map("peso_registrado") @db.Decimal(14, 4)
+  pesoSecoRegistrado      Decimal?   @map("peso_seco_registrado") @db.Decimal(14, 4)
+  humedadRegistradaPct    Decimal?   @map("humedad_registrada_pct") @db.Decimal(6, 2)
+  unidadPesoRegistrada    UnidadPeso @map("unidad_peso_registrada")
+  pesoKgCalculado         Decimal    @map("peso_kg_calculado") @db.Decimal(14, 4)
+  leyesSnapshot           Json       @map("leyes_snapshot")
+  createdAt               DateTime   @default(now()) @map("created_at")
+
+  venta                   Venta      @relation(fields: [ventaId], references: [id], onDelete: Cascade)
+  lote                    Lote       @relation(fields: [loteId], references: [id])
+
+  @@index([ventaId])
+  @@map("detalle_ventas")
+}
+
+model ResumenLeyVenta {
+  id                   String   @id @default(uuid())
+  ventaId              String   @map("venta_id")
+  codigoLey            String   @map("codigo_ley")
+  mineral              String
+  simbolo              String
+  nombreLey            String   @map("nombre_ley")
+  unidadMedida         String   @map("unidad_medida")
+  leyPromedio          Decimal  @map("ley_promedio") @db.Decimal(14, 4)
+  pesoBasePonderadoKg  Decimal  @map("peso_base_ponderado_kg") @db.Decimal(14, 4)
+  contenidoFino        Decimal? @map("contenido_fino") @db.Decimal(14, 4)
+  unidadFino           String?  @map("unidad_fino")
+  lotesIncluidos       Int      @map("lotes_incluidos")
+  lotesConFaltante     Int      @default(0) @map("lotes_con_faltante")
+  coberturaPct         Decimal  @default(100) @map("cobertura_pct") @db.Decimal(6, 2)
+  criterioPonderacion  String   @default("PESO_NETO_CONVERTIDO_KG") @map("criterio_ponderacion")
+  createdAt            DateTime @default(now()) @map("created_at")
+
+  venta                Venta    @relation(fields: [ventaId], references: [id], onDelete: Cascade)
+
+  @@unique([ventaId, codigoLey])
+  @@index([ventaId])
+  @@map("resumen_leyes_venta")
+}
+
+model DocumentoCumplimiento {
+  id               String                   @id @default(uuid())
+  tipoDocumento    String                   @map("tipo_documento") // FORMULARIO_M02, FORMULARIO_M03, BOLETO_PESAJE, CERTIFICADO_LAB, GUIA_REMISION, NIM_NIAR
+  numeroDocumento  String                   @map("numero_documento")
+  estado           EstadoDocumentoNormativo @default(RECIBIDO)
+  nombreArchivo    String?                  @map("nombre_archivo")
+  mimeType         String?                  @map("mime_type")
+  tamanoBytes      Int?                     @map("tamano_bytes")
+  hashIntegridad   String?                  @map("hash_integridad")
+  compraId         String?                  @map("compra_id")
+  loteId           String?                  @map("lote_id")
+  ventaId          String?                  @map("venta_id")
+  observaciones    String?
+  usuarioNombre    String                   @map("usuario_nombre")
+  fechaEmision     DateTime                 @default(now()) @map("fecha_emision")
+  createdAt        DateTime                 @default(now()) @map("created_at")
+
+  compra           Compra?                  @relation(fields: [compraId], references: [id], onDelete: Cascade)
+  lote             Lote?                    @relation(fields: [loteId], references: [id], onDelete: Cascade)
+  venta            Venta?                   @relation(fields: [ventaId], references: [id], onDelete: Cascade)
+
+  @@index([tipoDocumento])
+  @@index([loteId])
+  @@index([ventaId])
+  @@map("documentos_cumplimiento")
+}
+
+model Auditoria {
+  id             String   @id @default(uuid())
+  usuarioId      String?  @map("usuario_id")
+  usuarioNombre  String   @map("usuario_nombre")
+  accion         String
+  entidad        String
+  registroId     String   @map("registro_id")
+  ipOrigen       String?  @map("ip_origen")
+  idempotencyKey String?  @map("idempotency_key")
+  valorAnterior  Json?    @map("valor_anterior")
+  valorNuevo     Json?    @map("valor_nuevo")
+  fechaHora      DateTime @default(now()) @map("fecha_hora")
+
+  usuario        Usuario? @relation(fields: [usuarioId], references: [id])
+
+  @@index([fechaHora])
+  @@index([entidad, registroId])
+  @@map("auditoria")
+}
