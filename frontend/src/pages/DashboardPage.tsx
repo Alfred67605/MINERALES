@@ -328,46 +328,6 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* Cinta de Avisos con Colores Diferenciados (Esmeralda, Ámbar y Violeta) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {alertas.map((al: any, idx: number) => {
-          const estilosCard =
-            idx === 0
-              ? 'border-l-4 border-l-emerald-500 hover:border-emerald-400'
-              : idx === 1
-              ? 'border-l-4 border-l-amber-500 hover:border-amber-400'
-              : 'border-l-4 border-l-violet-500 hover:border-violet-400';
-          const estilosIcono =
-            idx === 0
-              ? 'bg-emerald-500/15 text-emerald-500'
-              : idx === 1
-              ? 'bg-amber-500/15 text-amber-500'
-              : 'bg-violet-500/15 text-violet-500';
-          return (
-            <button
-              key={al.id}
-              type="button"
-              onClick={() => navigate(al.ruta)}
-              className={`bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] ${estilosCard} rounded-2xl p-4 text-left flex items-start gap-3 transition shadow-sm`}
-            >
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${estilosIcono}`}>
-                {al.severidad === 'ADVERTENCIA' ? (
-                  <AlertTriangle className="w-5 h-5" />
-                ) : al.id === 'AL-M02' ? (
-                  <FileCheck2 className="w-5 h-5" />
-                ) : (
-                  <ShieldCheck className="w-5 h-5" />
-                )}
-              </div>
-              <div className="min-w-0">
-                <div className="text-xs font-bold text-[#0F172A] dark:text-[#F8FAFC]">{al.titulo}</div>
-                <div className="text-xs text-[#64748B] dark:text-[#94A3B8] mt-0.5">{al.detalle}</div>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
       {/* Gráficos Analíticos Multicolor */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-8 bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] rounded-2xl p-5 shadow-sm transition-colors">
@@ -529,7 +489,7 @@ export function DashboardPage() {
       </div>
 
       {/* Tablas de Actividad Reciente con Nombres Completos y Estado M-02 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-8">
         <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] rounded-2xl p-5 shadow-sm transition-colors">
           <div className="flex items-center justify-between mb-4">
             <div>

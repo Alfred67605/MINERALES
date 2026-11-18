@@ -14,6 +14,19 @@ async function main() {
   });
   console.log(`Deleted ${deletedDetalles.count} DetalleVenta for test lots.`);
 
+  // Eliminar ventas huérfanas (sin detalle) creadas por pruebas E2E previas
+  const huerfanas = await prisma.venta.findMany({
+    where: { detalles: { none: {} } },
+    select: { id: true },
+  });
+  const ventaIds = huerfanas.map((v) => v.id);
+  if (ventaIds.length) {
+    await prisma.resumenLeyVenta.deleteMany({ where: { ventaId: { in: ventaIds } } });
+    await prisma.documentoCumplimiento.deleteMany({ where: { ventaId: { in: ventaIds } } });
+    await prisma.venta.deleteMany({ where: { id: { in: ventaIds } } });
+  }
+  console.log(`Deleted ${ventaIds.length} orphan ventas.`);
+
   // Actualizar estado de los lotes a DISPONIBLE
   const updatedLotes = await prisma.lote.updateMany({
     where: { id: { in: ids } },

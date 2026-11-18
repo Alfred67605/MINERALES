@@ -87,43 +87,82 @@
 }
 
 /* Escala Tipográfica Amigable y Legible para el Cliente (Cero Letras Diminutas) */
+/* Escala moderada: legible pero sin letras gigantes */
 .text-\[9px\],
-.text-\[10px\] {
+.text-\[10px\],
+.text-\[11px\] {
+  font-size: 0.75rem !important;
+  line-height: 1.15rem !important;
+}
+
+.text-xs {
   font-size: 0.8125rem !important;
   line-height: 1.25rem !important;
 }
 
-.text-\[11px\],
-.text-xs {
-  font-size: 0.9rem !important;
-  line-height: 1.375rem !important;
-}
-
 .text-sm {
-  font-size: 1rem !important;
-  line-height: 1.5rem !important;
+  font-size: 0.875rem !important;
+  line-height: 1.4rem !important;
 }
 
 .text-base {
-  font-size: 1.08rem !important;
-  line-height: 1.6rem !important;
+  font-size: 0.95rem !important;
+  line-height: 1.5rem !important;
 }
 
+.text-lg { font-size: 1.05rem !important; line-height: 1.5rem !important; }
+.text-xl { font-size: 1.15rem !important; line-height: 1.6rem !important; }
+.text-2xl { font-size: 1.4rem !important; line-height: 1.8rem !important; }
+.text-3xl { font-size: 1.65rem !important; line-height: 2.1rem !important; }
+.text-4xl { font-size: 2rem !important; line-height: 2.4rem !important; }
+.text-5xl { font-size: 2.4rem !important; line-height: 2.8rem !important; }
+@media (min-width: 640px) {
+  .sm\:text-2xl { font-size: 1.5rem !important; line-height: 1.9rem !important; }
+  .sm\:text-3xl { font-size: 1.75rem !important; line-height: 2.2rem !important; }
+  .sm\:text-5xl { font-size: 2.6rem !important; line-height: 3rem !important; }
+  .sm\:text-base { font-size: 0.95rem !important; }
+}
+
+/* Etiquetas: sin mayúsculas forzadas ni espaciado exagerado */
+.uppercase { text-transform: none !important; }
+.tracking-wider, .tracking-widest, .tracking-wide { letter-spacing: 0.01em !important; }
+
 table th {
-  font-size: 0.85rem !important;
-  padding-top: 0.85rem !important;
-  padding-bottom: 0.85rem !important;
+  font-size: 0.78rem !important;
+  padding-top: 1rem !important;
+  padding-bottom: 1rem !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
 }
 
 table td {
-  font-size: 0.95rem !important;
+  font-size: 0.875rem !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+  line-height: 1.45 !important;
 }
 
 input,
 select,
 textarea {
-  font-size: 0.95rem !important;
+  font-size: 0.875rem !important;
 }
+
+table td .font-mono-num, table td.font-mono-num, table td .font-mono { white-space: nowrap; }
+table td, table th { vertical-align: middle; }
+
+/* Más aire: menos saturación visual */
+main > div > .space-y-6 > * + * { margin-top: 2.25rem !important; }
+main .space-y-6 { --tw-space-y-reverse: 0; }
+main .gap-3 { gap: 1rem !important; }
+main .gap-4 { gap: 1.5rem !important; }
+main .gap-5 { gap: 1.75rem !important; }
+main .gap-6 { gap: 2rem !important; }
+main .p-4 { padding: 1.25rem !important; }
+main .p-5 { padding: 1.5rem !important; }
+main .p-6 { padding: 1.75rem !important; }
+main .rounded-2xl { border-radius: 1rem; }
+main p { max-width: 75ch; }
 
 /* Badges Semánticos por Mineral y Estado */
 .badge-mineral-au {
