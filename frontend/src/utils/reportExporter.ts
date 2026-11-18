@@ -39,7 +39,12 @@ function descargarCSV(nombreArchivo: string, filas: string[][]) {
   URL.revokeObjectURL(url);
 }
 
-function dibujarMembretePDF(doc: jsPDF, titulo: string, subtitulo: string) {
+function dibujarMembretePDF(
+  doc: jsPDF,
+  titulo: string,
+  subtitulo: string,
+  tipoCambio: number = TIPO_CAMBIO_OFICIAL_BOB
+) {
   const pageWidth = doc.internal.pageSize.getWidth();
   doc.setFillColor(...COLOR_HEADER_BG);
   doc.rect(0, 0, pageWidth, 26, 'F');
@@ -64,7 +69,7 @@ function dibujarMembretePDF(doc: jsPDF, titulo: string, subtitulo: string) {
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(203, 213, 225);
-  doc.text(`Emitido: ${new Date().toLocaleString('es-BO')}  |  TC BCB: ${TIPO_CAMBIO_OFICIAL_BOB} Bs/$US`, pageWidth - 14, 19, { align: 'right' });
+  doc.text(`Emitido: ${new Date().toLocaleString('es-BO')}  |  TC Dólar Paralelo / BCB: ${tipoCambio.toFixed(2)} Bs/$US`, pageWidth - 14, 19, { align: 'right' });
 
   doc.setTextColor(...COLOR_TEXTO_OSCURO);
 }
@@ -107,15 +112,16 @@ function dibujarBloqueFirmasPDF(doc: jsPDF, yStart: number, izquierda: string, d
 
 export function exportarLiquidacionVentaExcel(
   venta: any,
-  cotizaciones: CotizacionReferencia[] = COTIZACIONES_OFICIALES_FALLBACK
+  cotizaciones: CotizacionReferencia[] = COTIZACIONES_OFICIALES_FALLBACK,
+  tipoCambio: number = TIPO_CAMBIO_OFICIAL_BOB
 ) {
-  const valGrupo = calcularValorizacionGrupo(venta.detalles || [], cotizaciones);
+  const valGrupo = calcularValorizacionGrupo(venta.detalles || [], cotizaciones, false, tipoCambio);
   const filas: string[][] = [
     ['MINERALFLOW BOLIVIA — LIQUIDACION DETALLADA DE VENTA MINERA'],
     ['Nro Venta', venta.numeroVenta, 'Fecha', formatearFechaBolivia(venta.fecha)],
     ['Comprador', venta.compradorNombre, 'NIT / ID', venta.compradorNit || '-'],
     ['Expediente M-02', venta.expedienteM02 || '-', 'Responsable', venta.usuarioNombre || '-'],
-    ['Observaciones', venta.observaciones || '-', 'Tipo Cambio', `${TIPO_CAMBIO_OFICIAL_BOB} Bs/$US`],
+    ['Observaciones', venta.observaciones || '-', 'Tipo Cambio (Paralelo / BCB)', `${tipoCambio.toFixed(2)} Bs/$US`],
     [],
     ['RESUMEN FINANCIERO Y OPERATIVO DE LA VENTA'],
     ['Total Lotes', String(venta.totalLotes), 'Total Sacos', String(venta.totalSacos)],
@@ -152,7 +158,7 @@ export function exportarLiquidacionVentaExcel(
     ['DETALLE DE LOTES Y VALOR POR SACO'],
     ['Nro Lote', 'Fecha Compra', 'Proveedor Original', 'Mina Origen', 'Mineral', 'Sacos', 'kg/Saco', 'Peso', 'Unidad', 'Leyes Individuales', 'Valor Lote (Bs)', 'Valor por Saco (Bs)', 'Valor Lote ($US)'],
     ...(venta.detalles || []).map((d: any) => {
-      const vl = calcularValorizacionLote(d, cotizaciones);
+      const vl = calcularValorizacionLote(d, cotizaciones, false, tipoCambio);
       return [
         d.numeroLote,
         formatearFechaBolivia(d.fechaCompra),
@@ -176,7 +182,8 @@ export function exportarLiquidacionVentaExcel(
 
 export function exportarHistorialVentasExcel(
   ventas: any[],
-  cotizaciones: CotizacionReferencia[] = COTIZACIONES_OFICIALES_FALLBACK
+  cotizaciones: CotizacionReferencia[] = COTIZACIONES_OFICIALES_FALLBACK,
+  tipoCambio: number = TIPO_CAMBIO_OFICIAL_BOB
 ) {
   let sumaLotes = 0;
   let sumaSacos = 0;
@@ -185,7 +192,7 @@ export function exportarHistorialVentasExcel(
   let sumaNetoUsd = 0;
 
   const cuerpo = ventas.map((v) => {
-    const val = calcularValorizacionGrupo(v.detalles || [], cotizaciones);
+    const val = calcularValorizacionGrupo(v.detalles || [], cotizaciones, false, tipoCambio);
     sumaLotes += Number(v.totalLotes || 0);
     sumaSacos += Number(v.totalSacos || 0);
     sumaPeso += Number(v.pesoTotalKg || 0);
@@ -211,7 +218,7 @@ export function exportarHistorialVentasExcel(
 
   const filas: string[][] = [
     ['MINERALFLOW BOLIVIA — REPORTE GENERAL DE VENTAS VALORIZADAS'],
-    ['Fecha Emision', new Date().toLocaleString('es-BO'), 'Tipo de Cambio', `${TIPO_CAMBIO_OFICIAL_BOB} Bs/$US`],
+    ['Fecha Emision', new Date().toLocaleString('es-BO'), 'Tipo de Cambio (Paralelo / BCB)', `${tipoCambio.toFixed(2)} Bs/$US`],
     [],
     ['Nro Venta', 'Fecha', 'Comprador', 'NIT', 'Lotes', 'Sacos', 'kg/Saco', 'Peso Total (kg)', 'Leyes Promedio', 'Bs/Saco Prom.', 'Total a Recibir (Bs)', 'Total ($US)', 'Responsable'],
     ...cuerpo,
@@ -224,15 +231,17 @@ export function exportarHistorialVentasExcel(
 
 export function exportarLiquidacionVentaPDF(
   venta: any,
-  cotizaciones: CotizacionReferencia[] = COTIZACIONES_OFICIALES_FALLBACK
+  cotizaciones: CotizacionReferencia[] = COTIZACIONES_OFICIALES_FALLBACK,
+  tipoCambio: number = TIPO_CAMBIO_OFICIAL_BOB
 ) {
   const doc = new jsPDF({ orientation: 'landscape' });
-  const valGrupo = calcularValorizacionGrupo(venta.detalles || [], cotizaciones);
+  const valGrupo = calcularValorizacionGrupo(venta.detalles || [], cotizaciones, false, tipoCambio);
 
   dibujarMembretePDF(
     doc,
     `LIQUIDACIÓN ${venta.numeroVenta}`,
-    'Comprobante Oficial Interno de Comercialización y Valorización de Lotes'
+    'Comprobante Oficial Interno de Comercialización y Valorización de Lotes',
+    tipoCambio
   );
 
   autoTable(doc, {
@@ -305,7 +314,7 @@ export function exportarLiquidacionVentaPDF(
       'Valor / Saco (Bs)',
     ]],
     body: (venta.detalles || []).map((d: any) => {
-      const vl = calcularValorizacionLote(d, cotizaciones);
+      const vl = calcularValorizacionLote(d, cotizaciones, false, tipoCambio);
       return [
         d.numeroLote,
         `${d.proveedorNombre}${d.minaOrigen ? ` (${d.minaOrigen})` : ''}`,
@@ -341,10 +350,11 @@ export function exportarLiquidacionVentaPDF(
 
 export function exportarHistorialVentasPDF(
   ventas: any[],
-  cotizaciones: CotizacionReferencia[] = COTIZACIONES_OFICIALES_FALLBACK
+  cotizaciones: CotizacionReferencia[] = COTIZACIONES_OFICIALES_FALLBACK,
+  tipoCambio: number = TIPO_CAMBIO_OFICIAL_BOB
 ) {
   const doc = new jsPDF({ orientation: 'landscape' });
-  dibujarMembretePDF(doc, 'REPORTE DE VENTAS', 'Resumen Consolidado de Ventas y Liquidaciones en Bolivianos');
+  dibujarMembretePDF(doc, 'REPORTE DE VENTAS', 'Resumen Consolidado de Ventas y Liquidaciones en Bolivianos', tipoCambio);
 
   let totalLotes = 0;
   let totalSacos = 0;
@@ -353,7 +363,7 @@ export function exportarHistorialVentasPDF(
   let totalUsd = 0;
 
   const filas = ventas.map((v) => {
-    const val = calcularValorizacionGrupo(v.detalles || [], cotizaciones);
+    const val = calcularValorizacionGrupo(v.detalles || [], cotizaciones, false, tipoCambio);
     totalLotes += Number(v.totalLotes || 0);
     totalSacos += Number(v.totalSacos || 0);
     totalPeso += Number(v.pesoTotalKg || 0);
@@ -420,12 +430,13 @@ export function exportarHistorialVentasPDF(
 export function exportarInventarioAlmacenPDF(
   lotes: LoteItem[],
   cotizaciones: CotizacionReferencia[] = COTIZACIONES_OFICIALES_FALLBACK,
-  tituloFiltro: string = 'INVENTARIO DE ALMACÉN'
+  tituloFiltro: string = 'INVENTARIO DE ALMACÉN',
+  tipoCambio: number = TIPO_CAMBIO_OFICIAL_BOB
 ) {
   const doc = new jsPDF({ orientation: 'landscape' });
-  const valGrupo = calcularValorizacionGrupo(lotes, cotizaciones);
+  const valGrupo = calcularValorizacionGrupo(lotes, cotizaciones, false, tipoCambio);
 
-  dibujarMembretePDF(doc, tituloFiltro, `Detalle de Lotes, Sacos y Valorización Estimada (${lotes.length} lotes)`);
+  dibujarMembretePDF(doc, tituloFiltro, `Detalle de Lotes, Sacos y Valorización Estimada (${lotes.length} lotes)`, tipoCambio);
 
   autoTable(doc, {
     startY: 32,
@@ -468,7 +479,7 @@ export function exportarInventarioAlmacenPDF(
       'Estado',
     ]],
     body: lotes.map((l) => {
-      const vl = calcularValorizacionLote(l, cotizaciones);
+      const vl = calcularValorizacionLote(l, cotizaciones, false, tipoCambio);
       return [
         l.numeroLote,
         formatearFechaBolivia(l.fechaCompra),
@@ -523,16 +534,18 @@ export interface DatosReporteGeneral {
     valorNetoBob: number;
   }>;
   cotizaciones: CotizacionReferencia[];
+  tipoCambio?: number;
 }
 
 export function exportarReporteGeneralExcel(datos: DatosReporteGeneral) {
+  const tc = datos.tipoCambio ?? TIPO_CAMBIO_OFICIAL_BOB;
   const lotesDisp = datos.lotes.filter((l) => l.estado === 'DISPONIBLE');
-  const valDisp = calcularValorizacionGrupo(lotesDisp, datos.cotizaciones);
-  const valTotal = calcularValorizacionGrupo(datos.lotes, datos.cotizaciones);
+  const valDisp = calcularValorizacionGrupo(lotesDisp, datos.cotizaciones, false, tc);
+  const valTotal = calcularValorizacionGrupo(datos.lotes, datos.cotizaciones, false, tc);
 
   const filas: string[][] = [
     ['MINERALFLOW BOLIVIA — REPORTE GENERAL Y ESTADISTICAS DE LOTES, SACOS Y VENTAS'],
-    ['Generado en', new Date().toLocaleString('es-BO'), 'Tipo de Cambio', `${TIPO_CAMBIO_OFICIAL_BOB} Bs/$US`],
+    ['Generado en', new Date().toLocaleString('es-BO'), 'Tipo de Cambio (Paralelo / BCB)', `${tc.toFixed(2)} Bs/$US`],
     [],
     ['RESUMEN EJECUTIVO'],
     ['Total Lotes Analizados', String(datos.lotes.length), 'Lotes Disponibles', String(lotesDisp.length)],
@@ -569,7 +582,7 @@ export function exportarReporteGeneralExcel(datos: DatosReporteGeneral) {
     ['DETALLE DE TODOS LOS LOTES Y SACOS'],
     ['Nro Lote', 'Fecha', 'Estado', 'Proveedor', 'Mina', 'Mineral', 'Sacos', 'kg/Saco', 'Peso Neto', 'Unidad', 'Leyes', 'Valor Lote (Bs)', 'Bs/Saco', 'Valor ($US)'],
     ...datos.lotes.map((l) => {
-      const vl = calcularValorizacionLote(l, datos.cotizaciones);
+      const vl = calcularValorizacionLote(l, datos.cotizaciones, false, tc);
       return [
         l.numeroLote,
         formatearFechaBolivia(l.fechaCompra),
@@ -594,14 +607,16 @@ export function exportarReporteGeneralExcel(datos: DatosReporteGeneral) {
 
 export function exportarReporteGeneralPDF(datos: DatosReporteGeneral) {
   const doc = new jsPDF({ orientation: 'landscape' });
+  const tc = datos.tipoCambio ?? TIPO_CAMBIO_OFICIAL_BOB;
   const lotesDisp = datos.lotes.filter((l) => l.estado === 'DISPONIBLE');
-  const valDisp = calcularValorizacionGrupo(lotesDisp, datos.cotizaciones);
-  const valTotal = calcularValorizacionGrupo(datos.lotes, datos.cotizaciones);
+  const valDisp = calcularValorizacionGrupo(lotesDisp, datos.cotizaciones, false, tc);
+  const valTotal = calcularValorizacionGrupo(datos.lotes, datos.cotizaciones, false, tc);
 
   dibujarMembretePDF(
     doc,
     'REPORTE GENERAL Y ESTADÍSTICAS',
-    `Consolidado Operativo y Valorizado en Bolivianos (${datos.lotes.length} lotes · ${datos.ventas.length} ventas)`
+    `Consolidado Operativo y Valorizado en Bolivianos (${datos.lotes.length} lotes · ${datos.ventas.length} ventas)`,
+    tc
   );
 
   autoTable(doc, {
@@ -677,7 +692,7 @@ export function exportarReporteGeneralPDF(datos: DatosReporteGeneral) {
     startY: 32,
     head: [['N.º Lote', 'Fecha', 'Estado', 'Proveedor', 'Mineral', 'Sacos', 'kg/Saco', 'Peso Neto', 'Leyes', 'Valor Lote (Bs)', 'Bs/Saco']],
     body: datos.lotes.map((l) => {
-      const vl = calcularValorizacionLote(l, datos.cotizaciones);
+      const vl = calcularValorizacionLote(l, datos.cotizaciones, false, tc);
       return [
         l.numeroLote,
         formatearFechaBolivia(l.fechaCompra),

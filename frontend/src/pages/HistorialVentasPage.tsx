@@ -35,6 +35,7 @@ export function HistorialVentasPage() {
   const [ventas, setVentas] = useState<any[]>([]);
   const [compradores, setCompradores] = useState<any[]>([]);
   const [cotizaciones, setCotizaciones] = useState<CotizacionReferencia[]>(COTIZACIONES_OFICIALES_FALLBACK);
+  const [tipoCambio, setTipoCambio] = useState<number>(TIPO_CAMBIO_OFICIAL_BOB);
   const [cargando, setCargando] = useState(true);
 
   // Filtros
@@ -60,14 +61,16 @@ export function HistorialVentasPage() {
       const [resVentas, resComp, resCot] = await Promise.all([
         apiFetch<{ ventas: any[] }>(`/api/ventas?${params.toString()}`),
         apiFetch<{ compradores: any[] }>('/api/compradores'),
-        apiFetch<{ cotizaciones: CotizacionReferencia[] }>('/api/cotizaciones').catch(() => ({
+        apiFetch<{ cotizaciones: CotizacionReferencia[]; tipoCambioBobUsd?: number }>('/api/cotizaciones').catch(() => ({
           cotizaciones: COTIZACIONES_OFICIALES_FALLBACK,
+          tipoCambioBobUsd: TIPO_CAMBIO_OFICIAL_BOB,
         })),
       ]);
 
       setVentas(resVentas.ventas);
       setCompradores(resComp.compradores);
       if (resCot.cotizaciones?.length) setCotizaciones(resCot.cotizaciones);
+      if (resCot.tipoCambioBobUsd) setTipoCambio(resCot.tipoCambioBobUsd);
     } finally {
       setCargando(false);
     }
@@ -87,17 +90,17 @@ export function HistorialVentasPage() {
 
   const exportarCSV = (ventaEspecifica?: any) => {
     if (ventaEspecifica) {
-      exportarLiquidacionVentaExcel(ventaEspecifica, cotizaciones);
+      exportarLiquidacionVentaExcel(ventaEspecifica, cotizaciones, tipoCambio);
     } else {
-      exportarHistorialVentasExcel(ventas, cotizaciones);
+      exportarHistorialVentasExcel(ventas, cotizaciones, tipoCambio);
     }
   };
 
   const exportarPDF = (ventaEspecifica?: any) => {
     if (ventaEspecifica) {
-      exportarLiquidacionVentaPDF(ventaEspecifica, cotizaciones);
+      exportarLiquidacionVentaPDF(ventaEspecifica, cotizaciones, tipoCambio);
     } else {
-      exportarHistorialVentasPDF(ventas, cotizaciones);
+      exportarHistorialVentasPDF(ventas, cotizaciones, tipoCambio);
     }
   };
 
@@ -243,7 +246,7 @@ export function HistorialVentasPage() {
               </thead>
               <tbody className="divide-y divide-slate-200/70 dark:divide-[#1A364E]/70 dark:divide-[#1A364E] text-xs">
                 {ventas.map((v) => {
-                  const valV = calcularValorizacionGrupo(v.detalles || [], cotizaciones, false, TIPO_CAMBIO_OFICIAL_BOB);
+                  const valV = calcularValorizacionGrupo(v.detalles || [], cotizaciones, false, tipoCambio);
                   return (
                   <tr key={v.id} className="hover:bg-slate-100 dark:hover:bg-[#0F2232]/50 transition">
                     <td className="py-3 px-4 font-mono-num font-bold text-amber-600 dark:text-[#06B6D4]">
@@ -400,7 +403,7 @@ export function HistorialVentasPage() {
 
               {/* 2. Resumen de Totales y Promedios Ponderados */}
               {(() => {
-                const valSel = calcularValorizacionGrupo(ventaSeleccionada.detalles || [], cotizaciones, false, TIPO_CAMBIO_OFICIAL_BOB);
+                const valSel = calcularValorizacionGrupo(ventaSeleccionada.detalles || [], cotizaciones, false, tipoCambio);
                 return (
                 <div className="space-y-3">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -501,7 +504,7 @@ export function HistorialVentasPage() {
                     </thead>
                     <tbody className="divide-y divide-slate-200/70 dark:divide-[#1A364E]/70">
                       {ventaSeleccionada.detalles.map((det: any) => {
-                        const vlDet = calcularValorizacionLote(det, cotizaciones, false, TIPO_CAMBIO_OFICIAL_BOB);
+                        const vlDet = calcularValorizacionLote(det, cotizaciones, false, tipoCambio);
                         return (
                         <tr key={det.id} className="hover:bg-slate-100 dark:hover:bg-[#0F2232]/60">
                           <td className="py-2.5 px-3 font-mono-num font-bold text-slate-900 dark:text-[#F8FAFC]">

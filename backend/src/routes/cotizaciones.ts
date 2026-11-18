@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { authenticate } from '../middleware/auth.js';
 
 export type ModoCotizacion = 'OFICIAL' | 'EN_VIVO' | 'MANUAL';
+export type ModoDolar = 'PARALELO' | 'BCB_REFERENCIAL' | 'BCB_OFICIAL' | 'MANUAL';
 
 export interface CotizacionItem {
   id: string;
@@ -225,20 +226,156 @@ const COTIZACIONES_OFICIALES_BASE: CotizacionItem[] = [
   },
 ];
 
-// Estado en memoria mutable para permitir edición manual y alternancia de modos
+// Estado dinámico del Tipo de Cambio del Dólar (BCB Valor Referencial + Dólar Paralelo Bolivia)
+interface TasasDolarInfo {
+  modoDolar: ModoDolar;
+  tipoCambioActivo: number;
+  tipoCambioManual: number;
+  fuenteActiva: string;
+  paralelo: { compra: number; venta: number; promedio: number; fuente: string };
+  bcbReferencial: { compra: number; venta: number; promedio: number; fuente: string };
+  bcbOficial: { compra: number; venta: number; promedio: number; fuente: string };
+  actualizadoEn: string;
+}
+
+const estadoDolar: TasasDolarInfo = {
+  modoDolar: 'PARALELO',
+  tipoCambioActivo: 11.92,
+  tipoCambioManual: 11.92,
+  fuenteActiva: 'Dólar Paralelo Bolivia (Referencial Mercado)',
+  paralelo: { compra: 11.85, venta: 11.97, promedio: 11.92, fuente: 'Mercado Paralelo / P2P Bolivia' },
+  bcbReferencial: { compra: 11.58, venta: 11.7, promedio: 11.7, fuente: 'Banco Central de Bolivia (Valor Referencial)' },
+  bcbOficial: { compra: 6.86, venta: 6.96, promedio: 6.96, fuente: 'BCB Tipo de Cambio Oficial Nominal' },
+  actualizadoEn: new Date().toISOString(),
+};
+
 let cotizacionesActuales: CotizacionItem[] = JSON.parse(JSON.stringify(COTIZACIONES_OFICIALES_BASE));
 let modoActual: ModoCotizacion = 'OFICIAL';
-const TIPO_CAMBIO_BCB = 6.96;
+
+function recalcularBobConTipoCambio() {
+  const tc = estadoDolar.tipoCambioActivo;
+  cotizacionesActuales = cotizacionesActuales.map((c) => ({
+    ...c,
+    cotizacionBob: Number((c.cotizacionUsd * tc).toFixed(2)),
+  }));
+}
+
+// Sincronizar inicialmente con 11.92 (Dólar Paralelo)
+recalcularBobConTipoCambio();
+
+async function sincronizarDolarParaleloEnVivo() {
+  try {
+    const resp = await fetch('https://bo.dolarapi.com/v1/dolares', {
+      signal: AbortSignal.timeout(2500),
+    });
+    if (!resp.ok) return false;
+    const lista: any[] = await resp.json();
+    if (!Array.isArray(lista)) return false;
+
+    const par = lista.find((d) => String(d.casa || '').toLowerCase().includes('binance') || String(d.casa || '').toLowerCase().includes('paralelo'));
+    const ofi = lista.find((d) => String(d.casa || '').toLowerCase().includes('oficial'));
+
+    if (par && Number(par.venta) > 0) {
+      const compra = Number(par.compra) > 0 ? Number(par.compra) : Number(par.venta);
+      const venta = Number(par.venta);
+      const prom = Number(((compra + venta) / 2).toFixed(2));
+      estadoDolar.paralelo = {
+        compra: Number(compra.toFixed(2)),
+        venta: Number(venta.toFixed(2)),
+        promedio: venta,
+        fuente: 'Dólar Paralelo En Vivo (bo.dolarapi.com)',
+      };
+      if (estadoDolar.modoDolar === 'PARALELO') {
+        estadoDolar.tipoCambioActivo = venta;
+        estadoDolar.fuenteActiva = `Dólar Paralelo En Vivo (${venta.toFixed(2)} Bs)`;
+      }
+      if (prom > 0) estadoDolar.actualizadoEn = new Date().toISOString();
+    }
+
+    if (ofi && Number(ofi.venta) > 0) {
+      const val = Number(ofi.venta);
+      if (val > 7.5) {
+        estadoDolar.bcbReferencial = {
+          compra: Number(ofi.compra) > 0 ? Number(Number(ofi.compra).toFixed(2)) : val,
+          venta: Number(val.toFixed(2)),
+          promedio: Number(val.toFixed(2)),
+          fuente: 'BCB Valor Referencial (bo.dolarapi.com)',
+        };
+        if (estadoDolar.modoDolar === 'BCB_REFERENCIAL') {
+          estadoDolar.tipoCambioActivo = estadoDolar.bcbReferencial.venta;
+        }
+      }
+    }
+    recalcularBobConTipoCambio();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function aplicarModoDolar(modo: ModoDolar, manual?: number) {
+  estadoDolar.modoDolar = modo;
+  if (modo === 'PARALELO') {
+    estadoDolar.tipoCambioActivo = estadoDolar.paralelo.promedio;
+    estadoDolar.fuenteActiva = estadoDolar.paralelo.fuente;
+  } else if (modo === 'BCB_REFERENCIAL') {
+    estadoDolar.tipoCambioActivo = estadoDolar.bcbReferencial.venta;
+    estadoDolar.fuenteActiva = estadoDolar.bcbReferencial.fuente;
+  } else if (modo === 'BCB_OFICIAL') {
+    estadoDolar.tipoCambioActivo = estadoDolar.bcbOficial.venta;
+    estadoDolar.fuenteActiva = estadoDolar.bcbOficial.fuente;
+  } else if (modo === 'MANUAL') {
+    const val = manual && manual > 0 ? Number(manual.toFixed(2)) : estadoDolar.tipoCambioManual;
+    estadoDolar.tipoCambioManual = val;
+    estadoDolar.tipoCambioActivo = val;
+    estadoDolar.fuenteActiva = 'Tipo de Cambio Manual';
+  }
+  estadoDolar.actualizadoEn = new Date().toISOString();
+  recalcularBobConTipoCambio();
+}
 
 export async function cotizacionesRoutes(app: FastifyInstance) {
-  // Obtener cotizaciones completas
+  // Obtener cotizaciones completas + tasas de dólar BCB y Paralelo
   app.get('/api/cotizaciones', { preHandler: [authenticate] }, async (request, reply) => {
+    const query = (request.query as any) || {};
+    if (query.refrescar === '1') {
+      await sincronizarDolarParaleloEnVivo();
+    }
+    recalcularBobConTipoCambio();
     return reply.send({
       modo: modoActual,
-      tipoCambio: TIPO_CAMBIO_BCB,
+      tipoCambio: estadoDolar.tipoCambioActivo,
+      tipoCambioBobUsd: estadoDolar.tipoCambioActivo,
+      dolar: estadoDolar,
       quincena: '2ª. QUINCENA NOVIEMBRE 2026',
       totalMinerales: cotizacionesActuales.length,
-      ultimaActualizacion: new Date().toISOString(),
+      ultimaActualizacion: estadoDolar.actualizadoEn,
+      cotizaciones: cotizacionesActuales,
+    });
+  });
+
+  // Cambiar régimen o valor del Dólar (PARALELO, BCB_REFERENCIAL, BCB_OFICIAL, MANUAL)
+  app.post('/api/cotizaciones/dolar', { preHandler: [authenticate] }, async (request, reply) => {
+    const schema = z.object({
+      modoDolar: z.enum(['PARALELO', 'BCB_REFERENCIAL', 'BCB_OFICIAL', 'MANUAL']),
+      tipoCambioManual: z.number().positive().max(100).optional(),
+      sincronizarEnVivo: z.boolean().optional(),
+    });
+    const parsed = schema.safeParse(request.body);
+    if (!parsed.success) {
+      return reply.status(400).send({ error: 'Parámetros de dólar inválidos' });
+    }
+
+    if (parsed.data.sincronizarEnVivo) {
+      await sincronizarDolarParaleloEnVivo();
+    }
+    aplicarModoDolar(parsed.data.modoDolar, parsed.data.tipoCambioManual);
+
+    return reply.send({
+      mensaje: `Tipo de cambio actualizado a ${estadoDolar.tipoCambioActivo.toFixed(2)} Bs/$US (${estadoDolar.fuenteActiva})`,
+      tipoCambio: estadoDolar.tipoCambioActivo,
+      tipoCambioBobUsd: estadoDolar.tipoCambioActivo,
+      dolar: estadoDolar,
       cotizaciones: cotizacionesActuales,
     });
   });
@@ -257,7 +394,9 @@ export async function cotizacionesRoutes(app: FastifyInstance) {
 
     if (modoActual === 'OFICIAL') {
       cotizacionesActuales = JSON.parse(JSON.stringify(COTIZACIONES_OFICIALES_BASE));
+      recalcularBobConTipoCambio();
     } else if (modoActual === 'EN_VIVO') {
+      await sincronizarDolarParaleloEnVivo();
       // Aplicar ligeras fluctuaciones de mercado LME/Comex
       cotizacionesActuales = cotizacionesActuales.map((c) => {
         const factor = 1 + (Math.random() * 0.04 - 0.02);
@@ -265,7 +404,7 @@ export async function cotizacionesRoutes(app: FastifyInstance) {
         return {
           ...c,
           cotizacionUsd: nuevoUsd,
-          cotizacionBob: Number((nuevoUsd * TIPO_CAMBIO_BCB).toFixed(2)),
+          cotizacionBob: Number((nuevoUsd * estadoDolar.tipoCambioActivo).toFixed(2)),
           origen: 'EN_VIVO',
           variacionPct: Number(((factor - 1) * 100).toFixed(2)),
           fechaActualizacion: new Date().toISOString(),
@@ -281,6 +420,9 @@ export async function cotizacionesRoutes(app: FastifyInstance) {
     return reply.send({
       mensaje: `Modo de cotización cambiado a: ${modoActual}`,
       modo: modoActual,
+      tipoCambio: estadoDolar.tipoCambioActivo,
+      tipoCambioBobUsd: estadoDolar.tipoCambioActivo,
+      dolar: estadoDolar,
       cotizaciones: cotizacionesActuales,
     });
   });
@@ -308,7 +450,7 @@ export async function cotizacionesRoutes(app: FastifyInstance) {
 
     const item = cotizacionesActuales[index];
     const nuevoUsd = parsed.data.cotizacionUsd;
-    const nuevoBob = Number((nuevoUsd * TIPO_CAMBIO_BCB).toFixed(2));
+    const nuevoBob = Number((nuevoUsd * estadoDolar.tipoCambioActivo).toFixed(2));
 
     cotizacionesActuales[index] = {
       ...item,
@@ -332,9 +474,13 @@ export async function cotizacionesRoutes(app: FastifyInstance) {
   app.post('/api/cotizaciones/reset', { preHandler: [authenticate] }, async (request, reply) => {
     cotizacionesActuales = JSON.parse(JSON.stringify(COTIZACIONES_OFICIALES_BASE));
     modoActual = 'OFICIAL';
+    recalcularBobConTipoCambio();
     return reply.send({
       mensaje: 'Cotizaciones restablecidas a los valores oficiales de la 2ª Quincena Noviembre 2026',
       modo: modoActual,
+      tipoCambio: estadoDolar.tipoCambioActivo,
+      tipoCambioBobUsd: estadoDolar.tipoCambioActivo,
+      dolar: estadoDolar,
       cotizaciones: cotizacionesActuales,
     });
   });
@@ -391,9 +537,10 @@ export async function cotizacionesRoutes(app: FastifyInstance) {
     const regaliaMineraUsd = valorBrutoUsd * (cotizacion.alicuotaRegalia / 100);
     const valorNetoUsd = Math.max(0, valorBrutoUsd - regaliaMineraUsd - deduccionMaquilaUsd);
 
-    const valorBrutoBob = valorBrutoUsd * TIPO_CAMBIO_BCB;
-    const regaliaMineraBob = regaliaMineraUsd * TIPO_CAMBIO_BCB;
-    const valorNetoBob = valorNetoUsd * TIPO_CAMBIO_BCB;
+    const tc = estadoDolar.tipoCambioActivo;
+    const valorBrutoBob = valorBrutoUsd * tc;
+    const regaliaMineraBob = regaliaMineraUsd * tc;
+    const valorNetoBob = valorNetoUsd * tc;
 
     return reply.send({
       cotizacion,
@@ -409,7 +556,7 @@ export async function cotizacionesRoutes(app: FastifyInstance) {
       deduccionMaquilaUsd,
       valorNetoUsd: Number(valorNetoUsd.toFixed(2)),
       valorNetoBob: Number(valorNetoBob.toFixed(2)),
-      tipoCambio: TIPO_CAMBIO_BCB,
+      tipoCambio: tc,
     });
   });
 }

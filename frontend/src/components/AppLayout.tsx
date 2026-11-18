@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -26,6 +26,8 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
 import { useUIPreferences } from '../context/UIPreferencesContext';
+import { apiFetch } from '../utils/api';
+import { TIPO_CAMBIO_OFICIAL_BOB, formatearNumeroBolivia } from '../utils/calculations';
 import { MineralCrystalSvg } from './MineralGraphics';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -35,8 +37,23 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [menuMovilAbierto, setMenuMovilAbierto] = useState(false);
   const [busquedaGlobal, setBusquedaGlobal] = useState('');
   const [notificacionesAbiertas, setNotificacionesAbiertas] = useState(false);
+  const [tipoCambioDolar, setTipoCambioDolar] = useState<number>(TIPO_CAMBIO_OFICIAL_BOB);
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    apiFetch<{ tipoCambio?: number }>('/api/cotizaciones')
+      .then((res) => {
+        if (res.tipoCambio) setTipoCambioDolar(res.tipoCambio);
+      })
+      .catch(() => {});
+    const handler = (e: Event) => {
+      const tc = (e as CustomEvent)?.detail?.tipoCambio;
+      if (tc) setTipoCambioDolar(tc);
+    };
+    window.addEventListener('mf-dolar-actualizado', handler);
+    return () => window.removeEventListener('mf-dolar-actualizado', handler);
+  }, []);
 
   const gruposNavegacion = [
     {
@@ -445,7 +462,17 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <span>{densidad === 'comfortable' ? 'Tabla Cómoda' : 'Tabla Compacta'}</span>
             </button>
 
-            {/* Acceso directo a Precios del Día */}
+            {/* Acceso directo a Dólar Paralelo/BCB y Precios del Día */}
+            <button
+              type="button"
+              onClick={() => navigate('/cotizaciones')}
+              data-testid="btn-topbar-dolar"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono-num font-bold bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-400/50 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-500/25 transition"
+              title="Tipo de cambio activo del Dólar (BCB / Paralelo) — Clic para cambiar"
+            >
+              <span>$US: {formatearNumeroBolivia(tipoCambioDolar, 2)} Bs</span>
+            </button>
+
             <button
               type="button"
               onClick={() => navigate('/cotizaciones')}

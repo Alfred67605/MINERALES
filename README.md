@@ -168,7 +168,7 @@ El formulario de inicio de sesión ya viene precargado con el usuario administra
 
 ## 📊 Reportes, Estadísticas y Valorización en Bolivianos (Bs)
 
-- En **Inicio / Resumen**, **Mi Almacén**, **Vender Lotes** y **Ventas Realizadas** el sistema calcula automáticamente el valor estimado neto en **Bolivianos (`Bs`)** y **Dólares (`$US`)** aplicando las cotizaciones oficiales SENARECOM (o precios en vivo/manuales), descontando la Regalía Minera (Ley 535) y detallando el **peso promedio por saco (`kg/saco`)** y el **valor por saco (`Bs/saco`)**.
+- En **Inicio / Resumen**, **Mi Almacén**, **Vender Lotes** y **Ventas Realizadas** el sistema calcula automáticamente el valor estimado neto en **Bolivianos (`Bs`)** y **Dólares (`$US`)** aplicando las cotizaciones oficiales SENARECOM (o precios en vivo/manuales), el **Tipo de Cambio del Dólar Paralelo (`11,92 Bs`) o Valor Referencial BCB (`11,70 Bs`)** configurable en tiempo real (con opción oficial nominal y manual), descontando la Regalía Minera (Ley 535) y detallando el **peso promedio por saco (`kg/saco`)** y el **valor por saco (`Bs/saco`)**.
 - En el módulo **Reportes y Estadísticas** (`/reportes`) puedes filtrar por fecha, mineral, proveedor o estado del lote, analizar estadísticas detalladas con gráficos por mineral, proveedor, ventas y lotes/sacos, y exportar todo a **PDF** corporativo o **Excel/CSV**.
 
 ---

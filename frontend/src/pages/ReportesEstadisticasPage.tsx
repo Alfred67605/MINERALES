@@ -212,6 +212,7 @@ export function ReportesEstadisticasPage() {
     estadisticasMinerales,
     estadisticasProveedores,
     cotizaciones,
+    tipoCambio,
   };
 
   const gridColor = esOscuro ? '#1A364E' : '#E2E8F0';
@@ -598,13 +599,13 @@ export function ReportesEstadisticasPage() {
                       <td className="py-3 px-4 text-right">
                         <div className="inline-flex gap-1.5">
                           <button
-                            onClick={() => exportarLiquidacionVentaPDF(v, cotizaciones)}
+                            onClick={() => exportarLiquidacionVentaPDF(v, cotizaciones, tipoCambio)}
                             className="px-2.5 py-1 rounded-lg bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 font-bold"
                           >
                             PDF
                           </button>
                           <button
-                            onClick={() => exportarLiquidacionVentaExcel(v, cotizaciones)}
+                            onClick={() => exportarLiquidacionVentaExcel(v, cotizaciones, tipoCambio)}
                             className="px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold"
                           >
                             Excel

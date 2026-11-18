@@ -124,12 +124,17 @@ test.describe('Suite E2E Integral — MineralFlow 2.0 (3D, Fallback 2D, Laborato
     await page.getByTestId('btn-confirmar-cierre-venta').click();
     await expect(page.getByText(/registrada y cerrada con éxito!/i)).toBeVisible();
 
-    // 8. Verificar Módulo de Precios de Minerales (Oficial Quincenal, En Vivo y Manual) y Modo Oscuro Azul Cian
+    // 8. Verificar Módulo de Precios de Minerales (Dólar Paralelo / BCB, Oficial Quincenal, En Vivo y Manual)
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.getByRole('link', { name: /Precios de Minerales/i }).click();
     await expect(
       page.getByRole('heading', { name: /Precios de Minerales/i })
     ).toBeVisible();
+    await expect(page.getByTestId('panel-dolar-bcb-paralelo')).toBeVisible();
+    await page.getByTestId('btn-dolar-bcb-ref').click();
+    await expect(page.getByTestId('btn-topbar-dolar')).toContainText('11,70 Bs');
+    await page.getByTestId('btn-dolar-paralelo').click();
+    await expect(page.getByTestId('btn-topbar-dolar')).toContainText('11,92 Bs');
 
     // Asegurar modo Oficial Quincenal y verificar valores oficiales (segunda imagen SENARECOM Noviembre 2026)
     await page.getByTestId('btn-modo-oficial').click();

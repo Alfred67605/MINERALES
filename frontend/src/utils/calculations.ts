@@ -402,7 +402,7 @@ export function getMineralBadgeClass(simbolo: string): string {
 
 // ================= MOTOR DE VALORIZACIÓN FINANCIERA EN BS Y USD (POR LOTE Y POR SACO) =================
 
-export const TIPO_CAMBIO_OFICIAL_BOB = 6.96;
+export const TIPO_CAMBIO_OFICIAL_BOB = 11.92;
 
 export interface CotizacionReferencia {
   id?: string;

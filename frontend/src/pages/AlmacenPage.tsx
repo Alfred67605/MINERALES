@@ -247,7 +247,7 @@ export function AlmacenPage() {
 
             <button
               type="button"
-              onClick={() => exportarInventarioAlmacenPDF(lotes, cotizaciones, `INVENTARIO (${estadoFiltro})`)}
+              onClick={() => exportarInventarioAlmacenPDF(lotes, cotizaciones, `INVENTARIO (${estadoFiltro})`, tipoCambio)}
               className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition shadow-xs"
               title="Descargar reporte completo en PDF"
             >

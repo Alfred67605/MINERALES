@@ -44,7 +44,10 @@ interface CotizacionItem {
 export function CotizacionesPage() {
   const [cotizaciones, setCotizaciones] = useState<CotizacionItem[]>([]);
   const [modo, setModo] = useState<'OFICIAL' | 'EN_VIVO' | 'MANUAL'>('OFICIAL');
-  const [tipoCambio, setTipoCambio] = useState(6.96);
+  const [tipoCambio, setTipoCambio] = useState(11.92);
+  const [dolarInfo, setDolarInfo] = useState<any | null>(null);
+  const [tcManualInput, setTcManualInput] = useState('11.92');
+  const [cambiandoDolar, setCambiandoDolar] = useState(false);
   const [quincena, setQuincena] = useState('2ª. QUINCENA NOVIEMBRE 2026');
   const [cargando, setCargando] = useState(true);
   const [q, setQ] = useState('');
@@ -71,7 +74,11 @@ export function CotizacionesPage() {
       const res = await apiFetch<any>('/api/cotizaciones');
       setCotizaciones(res.cotizaciones);
       setModo(res.modo);
-      setTipoCambio(res.tipoCambio || 6.96);
+      setTipoCambio(res.tipoCambio || 11.92);
+      if (res.dolar) {
+        setDolarInfo(res.dolar);
+        setTcManualInput(String(res.dolar.tipoCambioActivo || res.tipoCambio || 11.92));
+      }
       setQuincena(res.quincena || '2ª. QUINCENA NOVIEMBRE 2026');
       if (res.cotizaciones.length > 0 && !simuladorMineralId) {
         setSimuladorMineralId(res.cotizaciones[1]?.id || res.cotizaciones[0].id); // Default Estaño
@@ -107,10 +114,41 @@ export function CotizacionesPage() {
       const res = await apiFetch<any>('/api/cotizaciones/reset', { method: 'POST' });
       setCotizaciones(res.cotizaciones);
       setModo(res.modo);
+      if (res.dolar) setDolarInfo(res.dolar);
       setMensajeNotif('Valores restablecidos a la tabla oficial del Ministerio de Minería.');
       setTimeout(() => setMensajeNotif(''), 4000);
     } finally {
       setCargando(false);
+    }
+  };
+
+  const cambiarDolar = async (
+    modoDolar: 'PARALELO' | 'BCB_REFERENCIAL' | 'BCB_OFICIAL' | 'MANUAL',
+    sincronizarEnVivo = false
+  ) => {
+    const manualNum = parseFloat(tcManualInput);
+    if (modoDolar === 'MANUAL' && (isNaN(manualNum) || manualNum <= 0)) return;
+    setCambiandoDolar(true);
+    try {
+      const res = await apiFetch<any>('/api/cotizaciones/dolar', {
+        method: 'POST',
+        body: JSON.stringify({
+          modoDolar,
+          tipoCambioManual: modoDolar === 'MANUAL' ? manualNum : undefined,
+          sincronizarEnVivo,
+        }),
+      });
+      setCotizaciones(res.cotizaciones);
+      setTipoCambio(res.tipoCambio);
+      if (res.dolar) {
+        setDolarInfo(res.dolar);
+        setTcManualInput(String(res.tipoCambio));
+      }
+      window.dispatchEvent(new CustomEvent('mf-dolar-actualizado', { detail: { tipoCambio: res.tipoCambio } }));
+      setMensajeNotif(res.mensaje);
+      setTimeout(() => setMensajeNotif(''), 4500);
+    } finally {
+      setCambiandoDolar(false);
     }
   };
 
@@ -323,6 +361,152 @@ export function CotizacionesPage() {
         </motion.div>
       )}
 
+      {/* Panel de Tipo de Cambio del Dólar: BCB Valor Referencial vs Dólar Paralelo */}
+      <div
+        data-testid="panel-dolar-bcb-paralelo"
+        className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] rounded-2xl p-5 shadow-sm space-y-4"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-500">
+              <DollarSign className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-sm sm:text-base font-bold text-[#0F172A] dark:text-[#F8FAFC]">
+                Tipo de Cambio del Dólar (BCB y Dólar Paralelo): <span className="text-emerald-600 dark:text-emerald-400 font-mono-num">{formatearNumeroBolivia(tipoCambio, 2)} Bs / $US</span>
+              </h2>
+              <div className="text-xs text-[#64748B] dark:text-[#94A3B8]">
+                {dolarInfo?.fuenteActiva || 'Dólar Paralelo Bolivia'}
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            disabled={cambiandoDolar}
+            onClick={() => cambiarDolar('PARALELO', true)}
+            data-testid="btn-sync-dolar-envivo"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs transition disabled:opacity-60"
+          >
+            <Zap className="w-3.5 h-3.5 text-amber-300" />
+            <span>{cambiandoDolar ? 'Actualizando...' : 'Actualizar Dólar Paralelo En Vivo'}</span>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Opción 1: Dólar Paralelo */}
+          <button
+            type="button"
+            onClick={() => cambiarDolar('PARALELO')}
+            data-testid="btn-dolar-paralelo"
+            className={`text-left p-4 rounded-xl border transition ${
+              (dolarInfo?.modoDolar || 'PARALELO') === 'PARALELO'
+                ? 'bg-emerald-50 dark:bg-emerald-950/35 border-emerald-500 ring-2 ring-emerald-500/30'
+                : 'bg-[#F8FAFC] dark:bg-[#060D14] border-[#CBD5E1] dark:border-[#1A364E] hover:border-emerald-500/60'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300">Dólar Paralelo (Mercado)</span>
+              {(dolarInfo?.modoDolar || 'PARALELO') === 'PARALELO' && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500 text-white">ACTIVO</span>
+              )}
+            </div>
+            <div className="text-2xl font-mono-num font-extrabold text-[#0F172A] dark:text-[#F8FAFC] mt-1">
+              {formatearNumeroBolivia(dolarInfo?.paralelo?.promedio ?? 11.92, 2)} Bs
+            </div>
+            <div className="text-[11px] font-mono-num text-[#64748B] dark:text-[#94A3B8] mt-1">
+              Compra: {formatearNumeroBolivia(dolarInfo?.paralelo?.compra ?? 11.85, 2)} · Venta: {formatearNumeroBolivia(dolarInfo?.paralelo?.venta ?? 11.97, 2)}
+            </div>
+          </button>
+
+          {/* Opción 2: BCB Valor Referencial */}
+          <button
+            type="button"
+            onClick={() => cambiarDolar('BCB_REFERENCIAL')}
+            data-testid="btn-dolar-bcb-ref"
+            className={`text-left p-4 rounded-xl border transition ${
+              dolarInfo?.modoDolar === 'BCB_REFERENCIAL'
+                ? 'bg-cyan-50 dark:bg-cyan-950/35 border-cyan-500 ring-2 ring-cyan-500/30'
+                : 'bg-[#F8FAFC] dark:bg-[#060D14] border-[#CBD5E1] dark:border-[#1A364E] hover:border-cyan-500/60'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-cyan-700 dark:text-cyan-300">Valor Referencial BCB</span>
+              {dolarInfo?.modoDolar === 'BCB_REFERENCIAL' && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-600 text-white">ACTIVO</span>
+              )}
+            </div>
+            <div className="text-2xl font-mono-num font-extrabold text-[#0F172A] dark:text-[#F8FAFC] mt-1">
+              {formatearNumeroBolivia(dolarInfo?.bcbReferencial?.venta ?? 11.7, 2)} Bs
+            </div>
+            <div className="text-[11px] font-mono-num text-[#64748B] dark:text-[#94A3B8] mt-1">
+              Compra: {formatearNumeroBolivia(dolarInfo?.bcbReferencial?.compra ?? 11.58, 2)} · Venta: {formatearNumeroBolivia(dolarInfo?.bcbReferencial?.venta ?? 11.7, 2)}
+            </div>
+          </button>
+
+          {/* Opción 3: BCB Oficial Nominal */}
+          <button
+            type="button"
+            onClick={() => cambiarDolar('BCB_OFICIAL')}
+            data-testid="btn-dolar-bcb-oficial"
+            className={`text-left p-4 rounded-xl border transition ${
+              dolarInfo?.modoDolar === 'BCB_OFICIAL'
+                ? 'bg-indigo-50 dark:bg-indigo-950/35 border-indigo-500 ring-2 ring-indigo-500/30'
+                : 'bg-[#F8FAFC] dark:bg-[#060D14] border-[#CBD5E1] dark:border-[#1A364E] hover:border-indigo-500/60'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300">BCB Oficial (Fijo)</span>
+              {dolarInfo?.modoDolar === 'BCB_OFICIAL' && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-600 text-white">ACTIVO</span>
+              )}
+            </div>
+            <div className="text-2xl font-mono-num font-extrabold text-[#0F172A] dark:text-[#F8FAFC] mt-1">
+              {formatearNumeroBolivia(dolarInfo?.bcbOficial?.venta ?? 6.96, 2)} Bs
+            </div>
+            <div className="text-[11px] font-mono-num text-[#64748B] dark:text-[#94A3B8] mt-1">
+              Compra: {formatearNumeroBolivia(dolarInfo?.bcbOficial?.compra ?? 6.86, 2)} · Venta: {formatearNumeroBolivia(dolarInfo?.bcbOficial?.venta ?? 6.96, 2)}
+            </div>
+          </button>
+
+          {/* Opción 4: Dólar Manual */}
+          <div
+            className={`p-4 rounded-xl border transition ${
+              dolarInfo?.modoDolar === 'MANUAL'
+                ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-500 ring-2 ring-amber-500/30'
+                : 'bg-[#F8FAFC] dark:bg-[#060D14] border-[#CBD5E1] dark:border-[#1A364E]'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-bold text-amber-700 dark:text-amber-300">Escribir Cambio Manual</span>
+              {dolarInfo?.modoDolar === 'MANUAL' && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-slate-950">ACTIVO</span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5 mt-1">
+              <input
+                type="number"
+                step="0.01"
+                value={tcManualInput}
+                onChange={(e) => setTcManualInput(e.target.value)}
+                data-testid="input-dolar-manual"
+                className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] font-mono-num font-bold text-sm text-[#0F172A] dark:text-[#F8FAFC]"
+              />
+              <button
+                type="button"
+                onClick={() => cambiarDolar('MANUAL')}
+                className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shrink-0"
+              >
+                Aplicar
+              </button>
+            </div>
+            <div className="text-[11px] text-[#64748B] dark:text-[#94A3B8] mt-1">
+              Se aplica en Bs a todos los cálculos
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* 4 Tarjetas KPI de Referencia Rápida (Oro, Estaño, Plata, Zinc) con Bordes de Color */}
       {kpiDestacados.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -422,7 +606,7 @@ export function CotizacionesPage() {
                   COTIZACIONES OFICIALES
                 </h2>
                 <div className="text-[11px] font-mono-num text-slate-300 mt-0.5">
-                  {quincena} · Tipo de Cambio BCB: {tipoCambio} BOB/$US
+                  {quincena} · Tipo de Cambio Activo: {formatearNumeroBolivia(tipoCambio, 2)} Bs/$US ({dolarInfo?.modoDolar || 'PARALELO'})
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -720,7 +904,7 @@ export function CotizacionesPage() {
                     ${formatearNumeroBolivia(simResultado.valorNetoUsd, 2)} USD
                   </div>
                   <div className="text-xs font-mono-num text-emerald-700 dark:text-emerald-200 mt-0.5">
-                    {formatearNumeroBolivia(simResultado.valorNetoBob, 2)} Bs (Cambio: {tipoCambio} Bs)
+                    {formatearNumeroBolivia(simResultado.valorNetoBob, 2)} Bs (TC: {formatearNumeroBolivia(tipoCambio, 2)} Bs)
                   </div>
                 </div>
               </div>
