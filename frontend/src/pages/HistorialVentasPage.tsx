@@ -228,77 +228,77 @@ export function HistorialVentasPage() {
         {ventas.length === 0 && !cargando ? (
           <EmptyStateMineralSvg mensaje="No se encontraron ventas registradas con esos filtros" />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <div className="overflow-x-auto rounded-xl border border-slate-300 dark:border-[#1A364E] bg-white dark:bg-[#0A1622] shadow-xs">
+            <table className="w-full text-left table-excel">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-[#1A364E] bg-slate-50 dark:bg-[#060D14] text-[11px] font-bold uppercase text-slate-600 dark:text-[#94A3B8]">
-                  <th className="py-3 px-4">N.º de Venta</th>
-                  <th className="py-3 px-3">Fecha</th>
-                  <th className="py-3 px-3">Comprador</th>
-                  <th className="py-3 px-3 text-right">Cant. Lotes</th>
-                  <th className="py-3 px-3 text-right">Total Sacos</th>
-                  <th className="py-3 px-3 text-right">Peso Total</th>
-                  <th className="py-3 px-3 text-right">Recibido (Bs)</th>
-                  <th className="py-3 px-3">Ley Promedio Ponderada</th>
-                  <th className="py-3 px-3">Responsable</th>
-                  <th className="py-3 px-4 text-right">Acciones</th>
+                <tr className="border-b-2 border-slate-300 dark:border-[#244869] bg-slate-100 dark:bg-[#0D1D2C] text-xs font-bold text-slate-700 dark:text-[#94A3B8]">
+                  <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">N.º de Venta</th>
+                  <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Fecha</th>
+                  <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Comprador</th>
+                  <th className="py-2.5 px-3 text-right border-r border-slate-300 dark:border-[#1A364E]">Cant. Lotes</th>
+                  <th className="py-2.5 px-3 text-right border-r border-slate-300 dark:border-[#1A364E]">Total Sacos</th>
+                  <th className="py-2.5 px-3 text-right border-r border-slate-300 dark:border-[#1A364E]">Peso Total</th>
+                  <th className="py-2.5 px-3 text-right border-r border-slate-300 dark:border-[#1A364E]">Recibido (Bs)</th>
+                  <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Ley Promedio Ponderada</th>
+                  <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Responsable</th>
+                  <th className="py-2.5 px-3 text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200/70 dark:divide-[#1A364E]/70 dark:divide-[#1A364E] text-xs">
+              <tbody className="divide-y divide-slate-200 dark:divide-[#152E42] text-xs">
                 {ventas.map((v) => {
                   const valV = calcularValorizacionGrupo(v.detalles || [], cotizaciones, false, tipoCambio);
                   return (
                   <tr key={v.id} className="table-row-perf hover:bg-slate-100 dark:hover:bg-[#0F2232]/50">
-                    <td className="py-3 px-4 font-mono-num font-bold text-amber-600 dark:text-[#06B6D4]">
+                    <td className="py-2.5 px-3 font-mono-num font-bold text-amber-700 dark:text-[#06B6D4] border-r border-slate-200 dark:border-[#152E42]">
                       {v.numeroVenta}
                     </td>
-                    <td className="py-3 px-3 text-slate-600 dark:text-[#94A3B8]">
+                    <td className="py-2.5 px-3 text-slate-600 dark:text-[#94A3B8] border-r border-slate-200 dark:border-[#152E42]">
                       {formatearFechaBolivia(v.fecha)}
                     </td>
-                    <td className="py-3 px-3">
+                    <td className="py-2.5 px-3 border-r border-slate-200 dark:border-[#152E42]">
                       <div className="font-semibold text-slate-900 dark:text-[#F8FAFC]">{v.compradorNombre}</div>
                       <div className="text-[11px] text-slate-500 dark:text-[#94A3B8]">{v.compradorNit}</div>
                     </td>
-                    <td className="py-3 px-3 text-right font-mono-num font-bold text-slate-900 dark:text-[#F8FAFC]">
+                    <td className="py-2.5 px-3 text-right font-mono-num font-bold text-slate-900 dark:text-[#F8FAFC] border-r border-slate-200 dark:border-[#152E42]">
                       {v.totalLotes}
                     </td>
-                    <td className="py-3 px-3 text-right font-mono-num font-semibold text-slate-900 dark:text-[#F8FAFC]">
+                    <td className="py-2.5 px-3 text-right font-mono-num font-semibold text-slate-900 dark:text-[#F8FAFC] border-r border-slate-200 dark:border-[#152E42]">
                       {formatearEnteroBolivia(v.totalSacos)}
                       <span className="block text-[10px] font-normal text-slate-500 dark:text-[#94A3B8]">
                         {formatearNumeroBolivia(valV.pesoPromedioPorSacoKg, 1)} kg/saco
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-right font-mono-num font-bold text-[#0891B2] dark:text-[#22D3EE]">
+                    <td className="py-2.5 px-3 text-right font-mono-num font-bold text-cyan-800 dark:text-[#22D3EE] border-r border-slate-200 dark:border-[#152E42]">
                       {formatearNumeroBolivia(v.pesoTotalKg, 2)} kg
                     </td>
-                    <td className="py-3 px-3 text-right font-mono-num">
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400 block">
+                    <td className="py-2.5 px-3 text-right font-mono-num border-r border-slate-200 dark:border-[#152E42]">
+                      <span className="font-semibold text-emerald-700 dark:text-emerald-400 block">
                         {formatearMonedaBob(valV.valorNetoTotalBob)}
                       </span>
-                      <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold block">
+                      <span className="text-[10px] text-amber-700 dark:text-amber-400 font-medium block">
                         {formatearMonedaBob(valV.valorPromedioPorSacoBob)} / saco
                       </span>
                     </td>
-                    <td className="py-3 px-3">
+                    <td className="py-2.5 px-3 border-r border-slate-200 dark:border-[#152E42]">
                       <div className="flex flex-wrap gap-1">
                         {v.resumenLeyes.map((rl: any) => (
                           <span
                             key={rl.codigoLey}
-                            className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono-num font-bold bg-cyan-50 dark:bg-[#06B6D4]/15 text-[#0891B2] dark:text-[#22D3EE] border border-[#0891B2]/30 dark:border-[#06B6D4]/30"
+                            className="badge-ley-excel"
                           >
-                            {rl.simbolo}: {formatearNumeroBolivia(rl.leyPromedio, 2)}{' '}
-                            {rl.unidadMedida}
+                            <span className="text-slate-500 dark:text-slate-400">{rl.simbolo}:</span>
+                            <span>{formatearNumeroBolivia(rl.leyPromedio, 2)} {rl.unidadMedida}</span>
                           </span>
                         ))}
                       </div>
                     </td>
-                    <td className="py-3 px-3 text-slate-600 dark:text-[#94A3B8]">{v.usuarioNombre}</td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="py-2.5 px-3 text-slate-600 dark:text-[#94A3B8] border-r border-slate-200 dark:border-[#152E42]">{v.usuarioNombre}</td>
+                    <td className="py-2.5 px-3 text-right">
                       <div className="inline-flex items-center gap-1">
                         <button
                           onClick={() => setVentaSeleccionada(v)}
                           data-testid={`btn-detalle-venta-${v.numeroVenta}`}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#0891B2] dark:bg-[#06B6D4] text-white hover:bg-[#0e7490] dark:hover:bg-[#22D3EE] btn-tactile cursor-pointer"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-semibold bg-[#0891B2] dark:bg-[#06B6D4] text-white hover:bg-[#0e7490] btn-tactile cursor-pointer"
                         >
                           <Eye className="w-3.5 h-3.5" />
                           <span>Abrir Venta</span>
@@ -487,71 +487,72 @@ export function HistorialVentasPage() {
                 <h3 className="font-bold uppercase text-slate-900 dark:text-[#F8FAFC] mb-2.5">
                   Detalle de Lotes Vendidos ({ventaSeleccionada.detalles.length} Lotes)
                 </h3>
-                <div className="border border-slate-200 dark:border-[#1A364E] rounded-xl overflow-hidden">
-                  <table className="w-full text-left border-collapse">
+                <div className="overflow-x-auto rounded-xl border border-slate-300 dark:border-[#1A364E] bg-white dark:bg-[#0A1622] shadow-xs">
+                  <table className="w-full text-left table-excel">
                     <thead>
-                      <tr className="bg-slate-100 dark:bg-[#0D1D2C] border-b border-slate-200 dark:border-[#1A364E] text-[11px] font-bold uppercase text-slate-600 dark:text-[#94A3B8]">
-                        <th className="py-2.5 px-3">N.º Lote</th>
-                        <th className="py-2.5 px-3">Fecha Compra</th>
-                        <th className="py-2.5 px-3">Proveedor Original / Mina</th>
-                        <th className="py-2.5 px-3">Mineral</th>
-                        <th className="py-2.5 px-3 text-right">Sacos (kg/u)</th>
-                        <th className="py-2.5 px-3 text-right">Peso</th>
-                        <th className="py-2.5 px-3">Leyes Individuales (Snapshot)</th>
-                        <th className="py-2.5 px-3 text-right">Valor Lote / Saco (Bs)</th>
+                      <tr className="bg-slate-100 dark:bg-[#0D1D2C] border-b-2 border-slate-300 dark:border-[#244869] text-xs font-bold text-slate-700 dark:text-[#94A3B8]">
+                        <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">N.º Lote</th>
+                        <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Fecha Compra</th>
+                        <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Proveedor Original / Mina</th>
+                        <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Mineral</th>
+                        <th className="py-2.5 px-3 text-right border-r border-slate-300 dark:border-[#1A364E]">Sacos (kg/u)</th>
+                        <th className="py-2.5 px-3 text-right border-r border-slate-300 dark:border-[#1A364E]">Peso</th>
+                        <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Leyes Individuales</th>
+                        <th className="py-2.5 px-3 text-right border-r border-slate-300 dark:border-[#1A364E]">Valor Lote / Saco (Bs)</th>
                         <th className="py-2.5 px-3 text-center">Estado</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200/70 dark:divide-[#1A364E]/70">
+                    <tbody className="divide-y divide-slate-200 dark:divide-[#152E42]">
                       {ventaSeleccionada.detalles.map((det: any) => {
                         const vlDet = calcularValorizacionLote(det, cotizaciones, false, tipoCambio);
                         return (
                         <tr key={det.id} className="hover:bg-slate-100 dark:hover:bg-[#0F2232]/60">
-                          <td className="py-2.5 px-3 font-mono-num font-bold text-slate-900 dark:text-[#F8FAFC]">
+                          <td className="py-2.5 px-3 font-mono-num font-bold text-slate-900 dark:text-[#F8FAFC] border-r border-slate-200 dark:border-[#152E42]">
                             {det.numeroLote}
                           </td>
-                          <td className="py-2.5 px-3 text-slate-600 dark:text-[#94A3B8]">
+                          <td className="py-2.5 px-3 text-slate-600 dark:text-[#94A3B8] border-r border-slate-200 dark:border-[#152E42]">
                             {formatearFechaBolivia(det.fechaCompra)}
                           </td>
-                          <td className="py-2.5 px-3">
+                          <td className="py-2.5 px-3 border-r border-slate-200 dark:border-[#152E42]">
                             <div className="font-semibold text-slate-900 dark:text-[#F8FAFC]">
                               {det.proveedorNombre}
                             </div>
                             <div className="text-[10px] text-slate-500 dark:text-[#94A3B8]">{det.minaOrigen}</div>
                           </td>
-                          <td className="py-2.5 px-3">{det.tipoMineral}</td>
-                          <td className="py-2.5 px-3 text-right font-mono-num font-semibold">
+                          <td className="py-2.5 px-3 border-r border-slate-200 dark:border-[#152E42]">{det.tipoMineral}</td>
+                          <td className="py-2.5 px-3 text-right font-mono-num font-semibold border-r border-slate-200 dark:border-[#152E42]">
                             {det.sacosRegistrados}
                             <span className="block text-[10px] font-normal text-slate-500 dark:text-[#94A3B8]">
                               {formatearNumeroBolivia(vlDet.pesoPorSacoKg, 1)} kg/u
                             </span>
                           </td>
-                          <td className="py-2.5 px-3 text-right font-mono-num font-bold">
+                          <td className="py-2.5 px-3 text-right font-mono-num font-bold border-r border-slate-200 dark:border-[#152E42]">
                             {formatearNumeroBolivia(det.pesoRegistrado, 2)}{' '}
                             {det.unidadPesoRegistrada}
                           </td>
-                          <td className="py-2.5 px-3">
+                          <td className="py-2.5 px-3 border-r border-slate-200 dark:border-[#152E42]">
                             <div className="flex flex-wrap gap-1">
                               {(det.leyesSnapshot || []).map((l: any, idx: number) => (
                                 <span
                                   key={idx}
-                                  className="px-2 py-0.5 rounded bg-slate-100 dark:bg-[#0F2232] border border-slate-200 dark:border-[#1A364E] font-mono-num text-[11px]"
+                                  className="badge-ley-excel"
                                 >
-                                  {l.simbolo}: {l.valorStr} {l.unidadMedida}
+                                  <span className="text-slate-500 dark:text-slate-400">{l.simbolo}:</span>
+                                  <span>{l.valorStr} {l.unidadMedida}</span>
                                 </span>
                               ))}
                             </div>
                           </td>
-                          <td className="py-2.5 px-3 text-right font-mono-num">
-                            <span className="font-bold text-emerald-600 dark:text-emerald-400 block">
+                          <td className="py-2.5 px-3 text-right font-mono-num border-r border-slate-200 dark:border-[#152E42]">
+                            <span className="font-semibold text-emerald-700 dark:text-emerald-400 block">
                               {formatearMonedaBob(vlDet.valorNetoBob)}
                             </span>
-                            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold block">
+                            <span className="text-[10px] text-amber-700 dark:text-amber-400 font-medium block">
                               {formatearMonedaBob(vlDet.valorPorSacoBob)} / saco
                             </span>
                           </td>
                           <td className="py-2.5 px-3 text-center">
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 dark:bg-rose-950/30 text-amber-600 dark:text-amber-400">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60">
                               VENDIDO
                             </span>
                           </td>

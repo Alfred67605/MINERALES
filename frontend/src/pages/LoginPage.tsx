@@ -45,10 +45,10 @@ export function LoginPage() {
           </div>
           <div>
             <span className="font-display text-2xl sm:text-3xl font-extrabold text-[#0F172A] dark:text-[#F8FAFC] block leading-none">
-              MineralFlow
+              KOYOSIAT S.R.L.
             </span>
             <span className="text-[11px] font-bold uppercase tracking-wider text-[#0891B2] dark:text-[#06B6D4]">
-              Gestión Inteligente de Lotes Mineros · Bolivia
+              Comercialización y Gestión de Minerales · Bolivia
             </span>
           </div>
         </div>
@@ -204,7 +204,7 @@ export function LoginPage() {
               disabled={enviando}
               className="w-full py-3 px-4 rounded-xl bg-[#0891B2] dark:bg-[#06B6D4] hover:bg-[#0e7490] text-white font-bold text-sm shadow-sm flex items-center justify-center gap-2 transition active:scale-[0.99] disabled:opacity-60"
             >
-              <span>{enviando ? 'Verificando acceso...' : 'Ingresar a MineralFlow'}</span>
+              <span>{enviando ? 'Verificando acceso...' : 'Ingresar a KOYOSIAT S.R.L.'}</span>
               <ArrowRight className="w-4 h-4 text-amber-300" />
             </button>
           </form>

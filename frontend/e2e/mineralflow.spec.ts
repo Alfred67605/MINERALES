@@ -27,8 +27,8 @@ test.describe('Suite E2E Integral — MineralFlow 2.0 (3D, Fallback 2D, Laborato
     await page.setViewportSize({ width: 1720, height: 960 });
     await page.goto('/');
     await expect(page.locator('html')).toHaveClass(/dark/);
-    await expect(page.getByRole('button', { name: /Ingresar a MineralFlow/i })).toBeVisible();
-    await page.getByRole('button', { name: /Ingresar a MineralFlow/i }).click();
+    await expect(page.getByRole('button', { name: /Ingresar a (KOYOSIAT S\.R\.L\.|MineralFlow)/i })).toBeVisible();
+    await page.getByRole('button', { name: /Ingresar a (KOYOSIAT S\.R\.L\.|MineralFlow)/i }).click();
 
     // 2. Verificar Resumen General del Negocio y Desglose en Bolivianos
     await expect(

@@ -209,7 +209,7 @@ export function AuditoriaPage() {
   const exportarAuditoriaPDF = () => {
     const doc = new jsPDF({ orientation: 'landscape' });
     doc.setFontSize(14);
-    doc.text('MineralFlow Bolivia — Registro de Actividad y Usuarios', 14, 15);
+    doc.text('KOYOSIAT S.R.L. — Registro de Actividad y Usuarios', 14, 15);
     autoTable(doc, {
       startY: 22,
       head: [['Fecha y Hora', 'Usuario', 'Acción', 'Entidad', 'Detalle']],
@@ -223,7 +223,7 @@ export function AuditoriaPage() {
       styles: { fontSize: 7.5 },
       headStyles: { fillColor: [8, 145, 178] },
     });
-    doc.save('MineralFlow_Auditoria.pdf');
+    doc.save('KOYOSIAT_Auditoria.pdf');
   };
 
   return (

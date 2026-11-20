@@ -53,7 +53,7 @@ export async function crearRespaldo(usuario: string) {
   const ahora = new Date();
   const nombre = `respaldo_${ahora.toISOString().replace(/[:.]/g, '-').slice(0, 19)}.json`;
   const contenido = JSON.stringify(
-    { app: 'MineralFlow', version: 1, creadoEn: ahora.toISOString(), creadoPor: usuario, resumen, datos },
+    { app: 'KOYOSIAT S.R.L.', version: 1, creadoEn: ahora.toISOString(), creadoPor: usuario, resumen, datos },
     replacer
   );
   fs.writeFileSync(path.join(CARPETA, nombre), contenido, 'utf8');
@@ -66,7 +66,7 @@ function fechasAISO(obj: any) {
 
 export async function restaurarDesdeArchivo(archivo: string) {
   const crudo = JSON.parse(fs.readFileSync(archivo, 'utf8'));
-  if (crudo?.app !== 'MineralFlow' || !crudo.datos) throw new Error('El archivo no es un respaldo válido de MineralFlow.');
+  if ((crudo?.app !== 'KOYOSIAT S.R.L.' && crudo?.app !== 'MineralFlow') || !crudo.datos) throw new Error('El archivo no es un respaldo válido de KOYOSIAT S.R.L.');
   await prisma.$transaction(
     async (tx) => {
       for (const t of [...TABLAS].reverse()) await (tx as any)[t].deleteMany();
@@ -168,8 +168,8 @@ export async function respaldosRoutes(app: FastifyInstance) {
 
   app.post('/api/respaldos/importar', { ...soloAdmin, bodyLimit: 100 * 1024 * 1024 }, async (request, reply) => {
     const cuerpo: any = request.body;
-    if (cuerpo?.app !== 'MineralFlow' || !cuerpo.datos) {
-      return reply.status(400).send({ error: 'Archivo inválido', mensaje: 'El archivo no es un respaldo de MineralFlow.' });
+    if ((cuerpo?.app !== 'KOYOSIAT S.R.L.' && cuerpo?.app !== 'MineralFlow') || !cuerpo.datos) {
+      return reply.status(400).send({ error: 'Archivo inválido', mensaje: 'El archivo no es un respaldo válido de KOYOSIAT S.R.L.' });
     }
     asegurarCarpeta();
     const nombre = `respaldo_${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.json`;

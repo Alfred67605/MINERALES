@@ -14,7 +14,7 @@ import {
   formatearNumeroBolivia,
 } from './calculations';
 
-// Paleta corporativa MineralFlow para documentos PDF
+// Paleta corporativa KOYOSIAT S.R.L. para documentos PDF
 const COLOR_HEADER_BG: [number, number, number] = [8, 22, 34]; // #081622
 const COLOR_CYAN: [number, number, number] = [8, 145, 178]; // #0891B2
 const COLOR_EMERALD: [number, number, number] = [5, 150, 105]; // #059669
@@ -54,7 +54,7 @@ function dibujarMembretePDF(
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
-  doc.text('MINERALFLOW BOLIVIA', 14, 11);
+  doc.text('KOYOSIAT S.R.L.', 14, 11);
 
   doc.setFontSize(9.5);
   doc.setFont('helvetica', 'normal');
@@ -85,7 +85,7 @@ function agregarPieDePaginaPDF(doc: jsPDF) {
     doc.setFontSize(8);
     doc.setTextColor(...COLOR_TEXTO_GRIS);
     doc.text(
-      'MineralFlow Bolivia — Reporte Comercial y Valorización Referencial SENARECOM (Ley 535)',
+      'KOYOSIAT S.R.L. — Reporte Comercial y Valorización Referencial SENARECOM (Ley 535)',
       14,
       pageHeight - 7
     );
@@ -117,7 +117,7 @@ export function exportarLiquidacionVentaExcel(
 ) {
   const valGrupo = calcularValorizacionGrupo(venta.detalles || [], cotizaciones, false, tipoCambio);
   const filas: string[][] = [
-    ['MINERALFLOW BOLIVIA — LIQUIDACION DETALLADA DE VENTA MINERA'],
+    ['KOYOSIAT S.R.L. — LIQUIDACION DETALLADA DE VENTA MINERA'],
     ['Nro Venta', venta.numeroVenta, 'Fecha', formatearFechaBolivia(venta.fecha)],
     ['Comprador', venta.compradorNombre, 'NIT / ID', venta.compradorNit || '-'],
     ['Expediente M-02', venta.expedienteM02 || '-', 'Responsable', venta.usuarioNombre || '-'],
@@ -217,7 +217,7 @@ export function exportarHistorialVentasExcel(
   });
 
   const filas: string[][] = [
-    ['MINERALFLOW BOLIVIA — REPORTE GENERAL DE VENTAS VALORIZADAS'],
+    ['KOYOSIAT S.R.L. — REPORTE GENERAL DE VENTAS VALORIZADAS'],
     ['Fecha Emision', new Date().toLocaleString('es-BO'), 'Tipo de Cambio (Paralelo / BCB)', `${tipoCambio.toFixed(2)} Bs/$US`],
     [],
     ['Nro Venta', 'Fecha', 'Comprador', 'NIT', 'Lotes', 'Sacos', 'kg/Saco', 'Peso Total (kg)', 'Leyes Promedio', 'Bs/Saco Prom.', 'Total a Recibir (Bs)', 'Total ($US)', 'Responsable'],
@@ -226,7 +226,7 @@ export function exportarHistorialVentasExcel(
     ['TOTALES', '', `${ventas.length} ventas`, '', String(sumaLotes), String(sumaSacos), sumaSacos > 0 ? formatearNumeroBolivia(sumaPeso / sumaSacos, 2) : '0,00', formatearNumeroBolivia(sumaPeso, 2), '', sumaSacos > 0 ? formatearNumeroBolivia(sumaNetoBob / sumaSacos, 2) : '0,00', formatearNumeroBolivia(sumaNetoBob, 2), formatearNumeroBolivia(sumaNetoUsd, 2), ''],
   ];
 
-  descargarCSV('mineralflow_historial_ventas.csv', filas);
+  descargarCSV('koyosiat_historial_ventas.csv', filas);
 }
 
 export function exportarLiquidacionVentaPDF(
@@ -341,7 +341,7 @@ export function exportarLiquidacionVentaPDF(
   dibujarBloqueFirmasPDF(
     doc,
     (doc as any).lastAutoTable.finalY,
-    `Entregado por: ${venta.usuarioNombre || 'Comercializadora MineralFlow'}`,
+    `Entregado por: ${venta.usuarioNombre || 'Comercializadora KOYOSIAT S.R.L.'}`,
     `Recibido / Conforme: ${venta.compradorNombre}`
   );
   agregarPieDePaginaPDF(doc);
@@ -424,7 +424,7 @@ export function exportarHistorialVentasPDF(
   });
 
   agregarPieDePaginaPDF(doc);
-  doc.save('MineralFlow_Reporte_Ventas.pdf');
+  doc.save('KOYOSIAT_Reporte_Ventas.pdf');
 }
 
 export function exportarInventarioAlmacenPDF(
@@ -507,7 +507,7 @@ export function exportarInventarioAlmacenPDF(
   });
 
   agregarPieDePaginaPDF(doc);
-  doc.save(`MineralFlow_Inventario_${new Date().toISOString().slice(0, 10)}.pdf`);
+  doc.save(`KOYOSIAT_Inventario_${new Date().toISOString().slice(0, 10)}.pdf`);
 }
 
 export interface DatosReporteGeneral {
@@ -544,7 +544,7 @@ export function exportarReporteGeneralExcel(datos: DatosReporteGeneral) {
   const valTotal = calcularValorizacionGrupo(datos.lotes, datos.cotizaciones, false, tc);
 
   const filas: string[][] = [
-    ['MINERALFLOW BOLIVIA — REPORTE GENERAL Y ESTADISTICAS DE LOTES, SACOS Y VENTAS'],
+    ['KOYOSIAT S.R.L. — REPORTE GENERAL Y ESTADISTICAS DE LOTES, SACOS Y VENTAS'],
     ['Generado en', new Date().toLocaleString('es-BO'), 'Tipo de Cambio (Paralelo / BCB)', `${tc.toFixed(2)} Bs/$US`],
     [],
     ['RESUMEN EJECUTIVO'],
@@ -602,7 +602,7 @@ export function exportarReporteGeneralExcel(datos: DatosReporteGeneral) {
     }),
   ];
 
-  descargarCSV(`MineralFlow_Reporte_General_${new Date().toISOString().slice(0, 10)}.csv`, filas);
+  descargarCSV(`KOYOSIAT_Reporte_General_${new Date().toISOString().slice(0, 10)}.csv`, filas);
 }
 
 export function exportarReporteGeneralPDF(datos: DatosReporteGeneral) {
@@ -712,5 +712,5 @@ export function exportarReporteGeneralPDF(datos: DatosReporteGeneral) {
   });
 
   agregarPieDePaginaPDF(doc);
-  doc.save(`MineralFlow_Reporte_General_${new Date().toISOString().slice(0, 10)}.pdf`);
+  doc.save(`KOYOSIAT_Reporte_General_${new Date().toISOString().slice(0, 10)}.pdf`);
 }

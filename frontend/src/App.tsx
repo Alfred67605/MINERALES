@@ -26,7 +26,7 @@ function AppRoutes() {
         <div className="text-center space-y-2">
           <div className="w-10 h-10 border-3 border-[#06B6D4] border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-xs font-bold uppercase tracking-wider text-[#64748B] dark:text-[#94A3B8]">
-            Iniciando MineralFlow 2.0...
+            Iniciando KOYOSIAT S.R.L....
           </p>
         </div>
       </div>

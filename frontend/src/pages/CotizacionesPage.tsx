@@ -621,19 +621,19 @@ export function CotizacionesPage() {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto rounded-xl border border-slate-300 dark:border-[#1A364E] bg-white dark:bg-[#0A1622] shadow-xs">
+              <table className="w-full text-left table-excel">
                 <thead>
-                  <tr className="bg-[#F8FAFC] dark:bg-[#0D1D2C] border-b border-[#CBD5E1] dark:border-[#1A364E] text-[11px] font-bold uppercase tracking-wider text-[#334155] dark:text-[#94A3B8]">
-                    <th className="py-3 px-4">Mineral</th>
-                    <th className="py-3 px-3 text-center">Unid.</th>
-                    <th className="py-3 px-4 text-right bg-amber-500/10 text-amber-900 dark:text-amber-200 font-extrabold">
+                  <tr className="bg-slate-100 dark:bg-[#0D1D2C] border-b-2 border-slate-300 dark:border-[#244869] text-xs font-bold text-slate-700 dark:text-[#94A3B8]">
+                    <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Mineral</th>
+                    <th className="py-2.5 px-3 text-center border-r border-slate-300 dark:border-[#1A364E]">Unid.</th>
+                    <th className="py-2.5 px-3 text-right bg-amber-500/10 text-amber-900 dark:text-amber-200 font-extrabold border-r border-slate-300 dark:border-[#1A364E]">
                       Cotización $US
                     </th>
-                    <th className="py-3 px-4 text-right font-mono-num">Cotización Bs</th>
-                    <th className="py-3 px-3 text-center">Regalía (Ley 535)</th>
-                    <th className="py-3 px-3 text-center">Origen</th>
-                    <th className="py-3 px-3 text-center">Acción</th>
+                    <th className="py-2.5 px-3 text-right font-mono-num border-r border-slate-300 dark:border-[#1A364E]">Cotización Bs</th>
+                    <th className="py-2.5 px-3 text-center border-r border-slate-300 dark:border-[#1A364E]">Regalía (Ley 535)</th>
+                    <th className="py-2.5 px-3 text-center border-r border-slate-300 dark:border-[#1A364E]">Origen</th>
+                    <th className="py-2.5 px-3 text-center">Acción</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#CBD5E1]/60 dark:divide-[#1A364E]/60 text-xs text-[#0F172A] dark:text-[#F8FAFC]">

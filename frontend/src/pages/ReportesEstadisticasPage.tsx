@@ -467,30 +467,30 @@ export function ReportesEstadisticasPage() {
           </div>
 
           <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] rounded-2xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto rounded-xl border border-slate-300 dark:border-[#1A364E] bg-white dark:bg-[#0A1622] shadow-xs">
+              <table className="w-full text-left table-excel">
                 <thead>
-                  <tr className="bg-slate-50 dark:bg-[#060D14] border-b border-[#E2E8F0] dark:border-[#152E42] text-xs font-bold uppercase text-[#64748B] dark:text-[#94A3B8]">
-                    <th className="py-3 px-4">Mineral</th>
-                    <th className="py-3 px-3 text-right">Disp.</th>
-                    <th className="py-3 px-3 text-right">Vend.</th>
-                    <th className="py-3 px-3 text-right">Total Sacos</th>
-                    <th className="py-3 px-3 text-right">kg / Saco</th>
-                    <th className="py-3 px-3 text-right">Peso Total</th>
-                    <th className="py-3 px-3 text-right">Bs / Saco</th>
-                    <th className="py-3 px-4 text-right">Valor Neto (Bs / $US)</th>
+                  <tr className="bg-slate-100 dark:bg-[#0D1D2C] border-b-2 border-slate-300 dark:border-[#244869] text-xs font-bold text-slate-700 dark:text-[#94A3B8]">
+                    <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Mineral</th>
+                    <th className="py-2.5 px-3 text-right border-r border-slate-300 dark:border-[#1A364E]">Disp.</th>
+                    <th className="py-2.5 px-3 text-right border-r border-slate-300 dark:border-[#1A364E]">Vend.</th>
+                    <th className="py-2.5 px-3 text-right border-r border-slate-300 dark:border-[#1A364E]">Total Sacos</th>
+                    <th className="py-2.5 px-3 text-right border-r border-slate-300 dark:border-[#1A364E]">kg / Saco</th>
+                    <th className="py-2.5 px-3 text-right border-r border-slate-300 dark:border-[#1A364E]">Peso Total</th>
+                    <th className="py-2.5 px-3 text-right border-r border-slate-300 dark:border-[#1A364E]">Bs / Saco</th>
+                    <th className="py-2.5 px-3 text-right">Valor Neto (Bs / $US)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#E2E8F0] dark:divide-[#152E42] text-xs">
+                <tbody className="divide-y divide-slate-200 dark:divide-[#152E42] text-xs">
                   {estadisticasMinerales.map((m) => (
-                    <tr key={m.mineral} className="hover:bg-slate-50 dark:hover:bg-[#0F2232]/50">
-                      <td className="py-3 px-4 font-bold text-[#0F172A] dark:text-[#F8FAFC]">{m.mineral}</td>
-                      <td className="py-3 px-3 text-right font-mono-num text-emerald-600 dark:text-emerald-400 font-bold">{m.lotesDisponibles}</td>
-                      <td className="py-3 px-3 text-right font-mono-num text-rose-600 dark:text-rose-400 font-bold">{m.lotesVendidos}</td>
-                      <td className="py-3 px-3 text-right font-mono-num font-bold">{formatearEnteroBolivia(m.totalSacos)}</td>
-                      <td className="py-3 px-3 text-right font-mono-num">{formatearNumeroBolivia(m.pesoPorSacoKg, 2)} kg</td>
-                      <td className="py-3 px-3 text-right font-mono-num">{formatearNumeroBolivia(m.pesoTotalKg, 2)} kg</td>
-                      <td className="py-3 px-3 text-right font-mono-num text-amber-600 dark:text-amber-400 font-bold">
+                    <tr key={m.mineral} className="hover:bg-slate-100 dark:hover:bg-[#0F2232]/50">
+                      <td className="py-2.5 px-3 font-bold text-[#0F172A] dark:text-[#F8FAFC] border-r border-slate-200 dark:border-[#152E42]">{m.mineral}</td>
+                      <td className="py-2.5 px-3 text-right font-mono-num text-emerald-700 dark:text-emerald-400 font-bold border-r border-slate-200 dark:border-[#152E42]">{m.lotesDisponibles}</td>
+                      <td className="py-2.5 px-3 text-right font-mono-num text-rose-700 dark:text-rose-400 font-bold border-r border-slate-200 dark:border-[#152E42]">{m.lotesVendidos}</td>
+                      <td className="py-2.5 px-3 text-right font-mono-num font-bold border-r border-slate-200 dark:border-[#152E42]">{formatearEnteroBolivia(m.totalSacos)}</td>
+                      <td className="py-2.5 px-3 text-right font-mono-num border-r border-slate-200 dark:border-[#152E42]">{formatearNumeroBolivia(m.pesoPorSacoKg, 2)} kg</td>
+                      <td className="py-2.5 px-3 text-right font-mono-num border-r border-slate-200 dark:border-[#152E42]">{formatearNumeroBolivia(m.pesoTotalKg, 2)} kg</td>
+                      <td className="py-2.5 px-3 text-right font-mono-num text-amber-700 dark:text-amber-400 font-bold border-r border-slate-200 dark:border-[#152E42]">
                         {formatearMonedaBob(m.valorPorSacoBob)}
                       </td>
                       <td className="py-3 px-4 text-right font-mono-num">

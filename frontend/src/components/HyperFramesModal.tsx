@@ -29,7 +29,7 @@ const ESCENAS = [
   },
   {
     numero: 5,
-    titulo: 'Cierre Atómico — MineralFlow',
+    titulo: 'Cierre Atómico — KOYOSIAT S.R.L.',
     subtitulo: 'Transacción ACID en PostgreSQL, bloqueo contra doble venta e historial inmutable auditable.',
     duracionMs: 3600,
   },
@@ -75,7 +75,7 @@ export function HyperFramesModal({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4"
       role="dialog"
       aria-modal="true"
-      aria-label="Presentación Audiovisual HyperFrames — MineralFlow"
+      aria-label="Presentación Audiovisual HyperFrames — KOYOSIAT S.R.L."
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.96 }}
@@ -278,7 +278,7 @@ export function HyperFramesModal({
                     <CheckCircle2 className="w-9 h-9 text-amber-300" />
                   </div>
                   <h2 className="font-display text-4xl sm:text-5xl text-slate-900 dark:text-[#F8FAFC] tracking-tight">
-                    MineralFlow Bolivia
+                    KOYOSIAT S.R.L.
                   </h2>
                   <p className="text-sm font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-widest mt-1">
                     Gestión Inteligente de Lotes Mineros

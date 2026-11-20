@@ -888,11 +888,11 @@ export function SeleccionVentaPage() {
             }
           />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse select-none">
+          <div className="overflow-x-auto rounded-xl border border-slate-300 dark:border-[#1A364E] bg-white dark:bg-[#0A1622] shadow-xs">
+            <table className="w-full text-left table-excel select-none">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-[#1A364E] bg-slate-50 dark:bg-[#060D14] text-[11px] font-bold uppercase text-slate-600 dark:text-[#94A3B8]">
-                  <th className="py-3 px-4 w-12 text-center">
+                <tr className="border-b-2 border-slate-300 dark:border-[#244869] bg-slate-100 dark:bg-[#0D1D2C] text-xs font-bold text-slate-700 dark:text-[#94A3B8]">
+                  <th className="py-2.5 px-3 w-12 text-center border-r border-slate-300 dark:border-[#1A364E]">
                     <button
                       type="button"
                       onClick={toggleSeleccionarVisibles}
@@ -906,18 +906,18 @@ export function SeleccionVentaPage() {
                       )}
                     </button>
                   </th>
-                  <th className="py-3 px-3">N.º Lote</th>
-                  <th className="py-3 px-3">Fecha</th>
-                  <th className="py-3 px-3">Proveedor / Mina</th>
-                  <th className="py-3 px-3">Mineral</th>
-                  <th className="py-3 px-3 text-right">Sacos</th>
-                  <th className="py-3 px-3 text-right">Peso Húmedo / Seco</th>
-                  <th className="py-3 px-3">Leyes Individuales</th>
-                  <th className="py-3 px-3 text-right">Valor Lote / Saco</th>
-                  <th className="py-3 px-4 text-right">Acción</th>
+                  <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">N.º Lote</th>
+                  <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Fecha</th>
+                  <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Proveedor / Mina</th>
+                  <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Mineral</th>
+                  <th className="py-2.5 px-3 text-right border-r border-slate-300 dark:border-[#1A364E]">Sacos</th>
+                  <th className="py-2.5 px-3 text-right border-r border-slate-300 dark:border-[#1A364E]">Peso Húmedo / Seco</th>
+                  <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Leyes Individuales</th>
+                  <th className="py-2.5 px-3 text-right border-r border-slate-300 dark:border-[#1A364E]">Valor Lote / Saco</th>
+                  <th className="py-2.5 px-3 text-center">Acción</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200/70 dark:divide-[#1A364E]/70 text-xs">
+              <tbody className="divide-y divide-slate-200 dark:divide-[#152E42] text-xs">
                 {lotesVisiblesEnPagina.map((lote) => {
                   const marcado = seleccionadosSet.has(lote.id);
                   const vl = calcularValorizacionLote(lote, cotizaciones, usarPesoSeco, tipoCambio);
@@ -926,14 +926,15 @@ export function SeleccionVentaPage() {
                       key={lote.id}
                       onClick={(e) => manejarClicFila(lote.id, e)}
                       data-testid={`fila-lote-${lote.numeroLote}`}
+                      data-selected={marcado ? 'true' : 'false'}
                       className={`cursor-pointer table-row-perf ${
                         marcado
-                          ? 'bg-cyan-50 dark:bg-[#06B6D4]/15 hover:bg-cyan-100 dark:hover:bg-[#06B6D4]/25'
+                          ? 'fila-seleccionada'
                           : 'hover:bg-slate-100 dark:hover:bg-[#0F2232]/60'
                       }`}
                     >
                       <td
-                        className="py-3 px-4 text-center"
+                        className="py-2.5 px-3 text-center border-r border-slate-200 dark:border-[#152E42]"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <input
@@ -945,68 +946,65 @@ export function SeleccionVentaPage() {
                           className="w-4 h-4 accent-[#06B6D4] rounded cursor-pointer"
                         />
                       </td>
-                      <td className="py-3 px-3 font-mono-num font-bold text-slate-900 dark:text-[#F8FAFC]">
+                      <td className="py-2.5 px-3 font-mono-num font-bold text-slate-900 dark:text-[#F8FAFC] border-r border-slate-200 dark:border-[#152E42]">
                         {lote.numeroLote}
                       </td>
-                      <td className="py-3 px-3 text-slate-600 dark:text-[#94A3B8]">
+                      <td className="py-2.5 px-3 text-slate-600 dark:text-[#94A3B8] border-r border-slate-200 dark:border-[#152E42]">
                         {formatearFechaBolivia(lote.fechaCompra)}
                       </td>
-                      <td className="py-3 px-3">
+                      <td className="py-2.5 px-3 border-r border-slate-200 dark:border-[#152E42]">
                         <div className="font-semibold text-slate-900 dark:text-[#F8FAFC]">
                           {lote.proveedorNombre}
                         </div>
                         <div className="text-[11px] text-slate-500 dark:text-[#94A3B8]">{lote.minaOrigen}</div>
                       </td>
-                      <td className="py-3 px-3 font-medium text-slate-900 dark:text-[#F8FAFC]">
+                      <td className="py-2.5 px-3 font-medium text-slate-800 dark:text-[#E2E8F0] border-r border-slate-200 dark:border-[#152E42]">
                         {lote.tipoMineral}
                       </td>
-                      <td className="py-3 px-3 text-right font-mono-num font-semibold">
-                        {lote.cantidadSacos}
+                      <td className="py-2.5 px-3 text-right font-mono-num font-semibold border-r border-slate-200 dark:border-[#152E42]">
+                        <span className="text-slate-900 dark:text-[#F8FAFC]">{lote.cantidadSacos}</span>
                         <span className="block text-[10px] font-normal text-slate-500 dark:text-[#94A3B8]">
                           {formatearNumeroBolivia(vl.pesoPorSacoKg, 1)} kg/saco
                         </span>
                       </td>
-                      <td className="py-3 px-3 text-right font-mono-num">
+                      <td className="py-2.5 px-3 text-right font-mono-num border-r border-slate-200 dark:border-[#152E42]">
                         <span className="font-bold text-slate-900 dark:text-[#F8FAFC] block">
                           {formatearNumeroBolivia(lote.pesoNeto, 2)} {lote.unidadPeso}
                         </span>
-                        <span className="text-[10px] text-[#0891B2] dark:text-[#22D3EE] block">
+                        <span className="text-[10px] text-cyan-700 dark:text-cyan-400 block font-medium">
                           Seco: {formatearNumeroBolivia(lote.pesoSeco || lote.pesoNeto, 2)} {lote.unidadPeso}
                         </span>
                       </td>
-                      <td className="py-3 px-3">
+                      <td className="py-2.5 px-3 border-r border-slate-200 dark:border-[#152E42]">
                         <div className="flex flex-wrap gap-1">
                           {lote.leyes.map((ley) => (
                             <span
                               key={ley.codigoLey}
-                              className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono-num font-semibold border ${
-                                marcado
-                                  ? 'bg-white dark:bg-[#0A1622] text-[#0891B2] dark:text-[#22D3EE] border-[#0891B2]/30 dark:border-[#06B6D4]/40'
-                                  : 'bg-slate-100 dark:bg-[#0D1D2C] text-slate-900 dark:text-[#F8FAFC] border-slate-200 dark:border-[#1A364E]'
-                              }`}
+                              className="badge-ley-excel"
                             >
-                              {ley.simbolo}: {ley.valorStr} {ley.unidadMedida}
+                              <span className="text-slate-500 dark:text-slate-400">{ley.simbolo}:</span>
+                              <span>{ley.valorStr} {ley.unidadMedida}</span>
                             </span>
                           ))}
                         </div>
                       </td>
-                      <td className="py-3 px-3 text-right font-mono-num">
-                        <span className="font-bold text-emerald-600 dark:text-emerald-400 block">
+                      <td className="py-2.5 px-3 text-right font-mono-num border-r border-slate-200 dark:border-[#152E42]">
+                        <span className="font-semibold text-emerald-700 dark:text-emerald-400 block">
                           {formatearMonedaBob(vl.valorNetoBob)}
                         </span>
-                        <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold block">
+                        <span className="text-[10px] text-amber-700 dark:text-amber-400 font-medium block">
                           {formatearMonedaBob(vl.valorPorSacoBob)} / saco
                         </span>
                       </td>
                       <td
-                        className="py-3 px-4 text-right"
+                        className="py-2.5 px-3 text-center"
                         onClick={(e) => e.stopPropagation()}
                       >
                         {marcado ? (
                           <button
                             type="button"
                             onClick={() => quitarLoteDeSeleccion(lote.id)}
-                            className="px-2.5 py-1 rounded-lg text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-500/25 transition"
+                            className="px-2.5 py-1 rounded text-[11px] font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 border border-amber-200 dark:border-amber-800/60 transition"
                           >
                             Quitar
                           </button>
@@ -1014,7 +1012,7 @@ export function SeleccionVentaPage() {
                           <button
                             type="button"
                             onClick={(e) => manejarClicFila(lote.id, e)}
-                            className="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-[#0891B2] dark:text-[#22D3EE] bg-slate-50 dark:bg-[#060D14] hover:bg-cyan-50 dark:hover:bg-[#06B6D4]/15 border border-slate-200 dark:border-[#1A364E] transition"
+                            className="px-2.5 py-1 rounded text-[11px] font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-[#0D1D2C] hover:bg-sky-50 dark:hover:bg-cyan-950/40 hover:text-cyan-700 dark:hover:text-cyan-300 border border-slate-300 dark:border-[#1A364E] transition"
                           >
                             Elegir
                           </button>

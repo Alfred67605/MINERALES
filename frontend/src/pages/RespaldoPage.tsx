@@ -425,63 +425,63 @@ export function RespaldoPage() {
             Aún no hay respaldos. Pulsa <strong>Generar Respaldo Ahora</strong>.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
+          <div className="overflow-x-auto rounded-xl border border-slate-300 dark:border-[#1A364E] bg-white dark:bg-[#0A1622] shadow-xs">
+            <table className="w-full text-left table-excel">
               <thead>
-                <tr className="bg-slate-50 dark:bg-[#060D14] text-xs font-bold uppercase text-[#64748B] dark:text-[#94A3B8] border-b border-[#E2E8F0] dark:border-[#152E42]">
-                  <th className="py-3 px-6">Archivo</th>
-                  <th className="py-3 px-4">Fecha de Creación</th>
-                  <th className="py-3 px-4">Registros</th>
-                  <th className="py-3 px-4">Tamaño</th>
-                  <th className="py-3 px-6 text-right">Acciones</th>
+                <tr className="bg-slate-100 dark:bg-[#0D1D2C] text-xs font-bold text-slate-700 dark:text-[#94A3B8] border-b-2 border-slate-300 dark:border-[#244869]">
+                  <th className="py-2.5 px-4 border-r border-slate-300 dark:border-[#1A364E]">Archivo</th>
+                  <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Fecha de Creación</th>
+                  <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Registros</th>
+                  <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Tamaño</th>
+                  <th className="py-2.5 px-4 text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E2E8F0] dark:divide-[#152E42]">
+              <tbody className="divide-y divide-slate-200 dark:divide-[#152E42]">
                 {respaldos.map((r) => (
-                  <tr key={r.nombre} className="hover:bg-slate-50 dark:hover:bg-[#0F2232]/50" data-testid={`fila-respaldo-${r.nombre}`}>
-                    <td className="py-3.5 px-6">
-                      <div className="flex items-center gap-2.5 font-mono-num font-bold text-[#0F172A] dark:text-[#F8FAFC]">
+                  <tr key={r.nombre} className="hover:bg-slate-100 dark:hover:bg-[#0F2232]/50" data-testid={`fila-respaldo-${r.nombre}`}>
+                    <td className="py-2.5 px-4 border-r border-slate-200 dark:border-[#152E42]">
+                      <div className="flex items-center gap-2 font-mono-num font-bold text-slate-900 dark:text-[#F8FAFC]">
                         <FileArchive className="w-4 h-4 text-amber-500 shrink-0" />
                         <span>{r.nombre}</span>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 font-mono-num text-[#334155] dark:text-[#CBD5E1]">
+                    <td className="py-2.5 px-3 font-mono-num text-slate-700 dark:text-[#CBD5E1] border-r border-slate-200 dark:border-[#152E42]">
                       {formatoFechaExacta(r.creadoEn)}
                     </td>
-                    <td className="py-3.5 px-4 font-mono-num text-xs text-[#64748B] dark:text-[#94A3B8]">
+                    <td className="py-2.5 px-3 font-mono-num text-xs text-slate-600 dark:text-[#94A3B8] border-r border-slate-200 dark:border-[#152E42]">
                       {r.resumen
                         ? `${r.resumen.lote ?? 0} lotes · ${r.resumen.venta ?? 0} ventas · ${r.resumen.usuario ?? 0} usuarios`
                         : 'Completo'}
                     </td>
-                    <td className="py-3.5 px-4 font-mono-num text-[#334155] dark:text-[#CBD5E1]">
+                    <td className="py-2.5 px-3 font-mono-num text-slate-700 dark:text-[#CBD5E1] border-r border-slate-200 dark:border-[#152E42]">
                       {formatoTamano(r.tamano)}
                     </td>
-                    <td className="py-3.5 px-6">
-                      <div className="flex justify-end gap-2">
+                    <td className="py-2.5 px-4">
+                      <div className="flex justify-end gap-1.5">
                         <button
                           onClick={() => descargar(r)}
                           title="Descargar archivo"
                           aria-label="Descargar"
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 font-bold text-xs hover:bg-amber-500/25"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/60 font-semibold text-xs hover:bg-amber-100 dark:hover:bg-amber-900/40"
                         >
-                          <Download className="w-4 h-4" />
+                          <Download className="w-3.5 h-3.5" />
                           <span>Descargar</span>
                         </button>
                         <button
                           onClick={() => { setARestaurar(r); setConfirmacion(''); }}
                           title="Restaurar este respaldo"
                           aria-label="Restaurar"
-                          className="p-2 rounded-lg bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25"
+                          className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/40"
                         >
-                          <RotateCcw className="w-4 h-4" />
+                          <RotateCcw className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => eliminar(r)}
                           title="Eliminar respaldo"
                           aria-label="Eliminar respaldo"
-                          className="p-2 rounded-lg bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 hover:bg-rose-500/25"
+                          className="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-300 dark:border-rose-700/60 hover:bg-rose-100 dark:hover:bg-rose-900/40"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </td>

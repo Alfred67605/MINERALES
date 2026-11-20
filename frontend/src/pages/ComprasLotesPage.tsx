@@ -508,20 +508,20 @@ export function ComprasLotesPage() {
         {lotes.length === 0 && !cargando ? (
           <EmptyStateMineralSvg />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <div className="overflow-x-auto rounded-xl border border-slate-300 dark:border-[#1A364E] bg-white dark:bg-[#0A1622] shadow-xs">
+            <table className="w-full text-left table-excel">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-[#1A364E] bg-slate-50 dark:bg-[#060D14] text-[11px] font-bold uppercase text-slate-600 dark:text-[#94A3B8]">
-                  <th className="py-3 px-4">N.º Lote / Boleto</th>
-                  <th className="py-3 px-3">Compra / M-02</th>
-                  <th className="py-3 px-3">Fecha</th>
-                  <th className="py-3 px-3">Proveedor / Mina</th>
-                  <th className="py-3 px-3">Mineral</th>
-                  <th className="py-3 px-3 text-right">Sacos</th>
-                  <th className="py-3 px-3 text-right">Peso Húmedo / Seco</th>
-                  <th className="py-3 px-3">Ensayes Químicos</th>
-                  <th className="py-3 px-3 text-center">Estado</th>
-                  <th className="py-3 px-4 text-right">Acciones</th>
+                <tr className="border-b-2 border-slate-300 dark:border-[#244869] bg-slate-100 dark:bg-[#0D1D2C] text-xs font-bold text-slate-700 dark:text-[#94A3B8]">
+                  <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">N.º Lote / Boleto</th>
+                  <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Compra / M-02</th>
+                  <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Fecha</th>
+                  <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Proveedor / Mina</th>
+                  <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Mineral</th>
+                  <th className="py-2.5 px-3 text-right border-r border-slate-300 dark:border-[#1A364E]">Sacos</th>
+                  <th className="py-2.5 px-3 text-right border-r border-slate-300 dark:border-[#1A364E]">Peso Húmedo / Seco</th>
+                  <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Ensayes Químicos</th>
+                  <th className="py-2.5 px-3 text-center border-r border-slate-300 dark:border-[#1A364E]">Estado</th>
+                  <th className="py-2.5 px-3 text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200/70 dark:divide-[#1A364E]/70 text-xs">

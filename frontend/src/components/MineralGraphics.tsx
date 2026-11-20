@@ -140,7 +140,7 @@ export const WarehouseFlowDiagramSvg = memo(function WarehouseFlowDiagramSvg({
           <polygon points="36,42 48,24 62,42" fill="#06B6D4" fillOpacity="0.25" stroke="#06B6D4" strokeWidth="1.2" />
         </g>
 
-        {/* Nodo 2: Almacén MineralFlow */}
+        {/* Nodo 2: Almacén KOYOSIAT S.R.L. */}
         <g transform="translate(275, 6)">
           <rect width="130" height="62" rx="10" fill="#0891B2" />
           <rect x="16" y="18" width="24" height="16" rx="3" fill="#F8FAFC" fillOpacity="0.9" />

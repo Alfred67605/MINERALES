@@ -30,7 +30,7 @@ export function LaboratorioPage() {
     valor: '',
     tipoEnsaye: 'FINAL',
     estadoMedicion: 'VALIDADO',
-    laboratorio: 'Laboratorio Químico MineralFlow — Potosí',
+    laboratorio: 'Laboratorio Químico KOYOSIAT S.R.L. — Potosí',
     nroCertificado: '',
     motivoCambio: '',
   });
@@ -70,7 +70,7 @@ export function LaboratorioPage() {
       valor: String(eItem.valor),
       tipoEnsaye: eItem.tipoEnsaye || 'FINAL',
       estadoMedicion: eItem.estadoMedicion || 'VALIDADO',
-      laboratorio: eItem.laboratorio || 'Laboratorio Químico MineralFlow — Potosí',
+      laboratorio: eItem.laboratorio || 'Laboratorio Químico KOYOSIAT S.R.L. — Potosí',
       nroCertificado: eItem.nroCertificado || `CERT-${eItem.numeroLote}`,
       motivoCambio: 'Actualización por certificado de laboratorio validado',
     });
@@ -195,25 +195,25 @@ export function LaboratorioPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto rounded-xl border border-slate-300 dark:border-[#1A364E] bg-white dark:bg-[#0A1622] shadow-xs">
+          <table className="w-full text-left table-excel">
             <thead>
-              <tr className="bg-[#F1F5F9] dark:bg-[#060D14] border-b border-[#CBD5E1] dark:border-[#1A364E] text-[11px] font-bold uppercase text-[#64748B] dark:text-[#94A3B8]">
-                <th className="py-3 px-4">Lote / Proveedor</th>
-                <th className="py-3 px-3">Ley Mineral</th>
-                <th className="py-3 px-3 text-right">Resultado</th>
-                <th className="py-3 px-3">Tipo / Estado Medición</th>
-                <th className="py-3 px-3">Certificado / Laboratorio</th>
-                <th className="py-3 px-3 text-center">Versión</th>
-                <th className="py-3 px-4 text-right">Acciones</th>
+              <tr className="bg-slate-100 dark:bg-[#0D1D2C] border-b-2 border-slate-300 dark:border-[#244869] text-xs font-bold text-slate-700 dark:text-[#94A3B8]">
+                <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Lote / Proveedor</th>
+                <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Ley Mineral</th>
+                <th className="py-2.5 px-3 text-right border-r border-slate-300 dark:border-[#1A364E]">Resultado</th>
+                <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Tipo / Estado Medición</th>
+                <th className="py-2.5 px-3 border-r border-slate-300 dark:border-[#1A364E]">Certificado / Laboratorio</th>
+                <th className="py-2.5 px-3 text-center border-r border-slate-300 dark:border-[#1A364E]">Versión</th>
+                <th className="py-2.5 px-3 text-right">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#CBD5E1]/60 dark:divide-[#1A364E]/60 text-xs text-[#0F172A] dark:text-[#F8FAFC]">
+            <tbody className="divide-y divide-slate-200 dark:divide-[#152E42] text-xs text-[#0F172A] dark:text-[#F8FAFC]">
               {ensayesPaginados.map((eItem) => {
                 const esDisponible = eItem.estadoLote === 'DISPONIBLE';
                 return (
-                  <tr key={eItem.id} className="hover:bg-[#F8FAFC] dark:hover:bg-[#0F2232]/60 transition">
-                    <td className="py-3 px-4">
+                  <tr key={eItem.id} className="hover:bg-slate-100 dark:hover:bg-[#0F2232]/60 transition">
+                    <td className="py-2.5 px-3 border-r border-slate-200 dark:border-[#152E42]">
                       <span className="font-mono-num font-bold text-[#0F172A] dark:text-[#F8FAFC] block">
                         {eItem.numeroLote}
                       </span>
@@ -221,7 +221,7 @@ export function LaboratorioPage() {
                         {eItem.proveedorNombre} ({formatearNumeroBolivia(eItem.pesoNeto, 0)} {eItem.unidadPeso})
                       </span>
                     </td>
-                    <td className="py-3 px-3">
+                    <td className="py-2.5 px-3 border-r border-slate-200 dark:border-[#152E42]">
                       <span className="font-bold text-[#0891B2] dark:text-[#22D3EE]">
                         {eItem.simbolo} — {eItem.nombreLey}
                       </span>
@@ -229,18 +229,18 @@ export function LaboratorioPage() {
                         Unidad: {eItem.unidadMedida}
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-right font-mono-num font-extrabold text-sm text-[#0F172A] dark:text-[#F8FAFC]">
+                    <td className="py-2.5 px-3 text-right font-mono-num font-extrabold text-sm text-[#0F172A] dark:text-[#F8FAFC] border-r border-slate-200 dark:border-[#152E42]">
                       {eItem.valorStr} {eItem.unidadMedida}
                     </td>
-                    <td className="py-3 px-3">
-                      <span className="px-2 py-0.5 rounded bg-cyan-500/15 text-[#0891B2] dark:text-[#22D3EE] border border-[#06B6D4]/30 font-bold text-[10px] mr-1">
+                    <td className="py-2.5 px-3 border-r border-slate-200 dark:border-[#152E42]">
+                      <span className="px-1.5 py-0.5 rounded bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/60 font-semibold text-[10px] mr-1">
                         {eItem.tipoEnsaye}
                       </span>
-                      <span className="px-2 py-0.5 rounded bg-[#F1F5F9] dark:bg-[#0F2232] border border-[#CBD5E1] dark:border-[#1A364E] text-[#0F172A] dark:text-[#F8FAFC] font-mono-num text-[10px]">
+                      <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-mono-num text-[10px]">
                         {eItem.estadoMedicion}
                       </span>
                     </td>
-                    <td className="py-3 px-3">
+                    <td className="py-2.5 px-3 border-r border-slate-200 dark:border-[#152E42]">
                       <span className="font-mono-num font-bold text-[#0F172A] dark:text-[#F8FAFC] flex items-center gap-1">
                         <FileBadge className="w-3.5 h-3.5 text-amber-500" />
                         {eItem.nroCertificado || 'CERT-INTERNO'}
@@ -249,12 +249,12 @@ export function LaboratorioPage() {
                         {eItem.laboratorio}
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-center">
+                    <td className="py-2.5 px-3 text-center border-r border-slate-200 dark:border-[#152E42]">
                       <span className="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/40 font-mono-num font-bold text-[11px] text-amber-700 dark:text-amber-300">
                         v{eItem.versionActual}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="py-2.5 px-3 text-right">
                       <div className="inline-flex items-center gap-1">
                         <button
                           onClick={() => setEnsayeHistorial(eItem)}

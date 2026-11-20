@@ -207,14 +207,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="leading-tight">
                 <div className="flex items-center gap-1.5">
                   <span className="font-display text-xl font-extrabold tracking-tight text-[#0F172A] dark:text-[#F8FAFC]">
-                    MineralFlow
-                  </span>
-                  <span className="text-[10px] font-mono-num font-bold px-1.5 py-0.5 rounded bg-[#0891B2] dark:bg-[#06B6D4] text-white dark:text-[#041019]">
-                    2.0
+                    KOYOSIAT S.R.L.
                   </span>
                 </div>
                 <span className="text-[10px] font-bold tracking-wide text-[#0891B2] dark:text-[#22D3EE] block">
-                  Control Minero Fácil
+                  Comercializadora de Minerales
                 </span>
               </div>
             )}
@@ -355,7 +352,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <div className="flex items-center gap-2.5">
                   <MineralCrystalSvg className="w-7 h-7" />
                   <span className="font-display text-xl font-extrabold text-slate-900 dark:text-[#F8FAFC]">
-                    MineralFlow 2.0
+                    KOYOSIAT S.R.L.
                   </span>
                 </div>
                 <button
