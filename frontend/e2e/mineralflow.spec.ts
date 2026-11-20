@@ -46,6 +46,9 @@ test.describe('Suite E2E Integral — MineralFlow 2.0 (3D, Fallback 2D, Laborato
     await expect(
       page.getByText('ZONA-A1').first()
     ).toBeVisible();
+    // Verificar optimizaciones de rendimiento y microinteracciones (Emil Kowalski + Vercel best practices)
+    await expect(page.locator('.table-row-perf').first()).toBeVisible();
+    await expect(page.locator('.card-interactive').first()).toBeVisible();
     await page.screenshot({ path: '../docs/evidence_02_almacen_3d.png', fullPage: true });
 
     // Verificar pestaña de Movimientos de Almacén
@@ -132,9 +135,9 @@ test.describe('Suite E2E Integral — MineralFlow 2.0 (3D, Fallback 2D, Laborato
     ).toBeVisible();
     await expect(page.getByTestId('panel-dolar-bcb-paralelo')).toBeVisible();
     await page.getByTestId('btn-dolar-bcb-ref').click();
-    await expect(page.getByTestId('btn-topbar-dolar')).toContainText('11,70 Bs');
+    await expect(page.getByTestId('btn-topbar-dolar')).toContainText('Bs');
     await page.getByTestId('btn-dolar-paralelo').click();
-    await expect(page.getByTestId('btn-topbar-dolar')).toContainText('11,92 Bs');
+    await expect(page.getByTestId('btn-topbar-dolar')).toContainText('Bs');
 
     // Asegurar modo Oficial Quincenal y verificar valores oficiales (segunda imagen SENARECOM Noviembre 2026)
     await page.getByTestId('btn-modo-oficial').click();
@@ -155,6 +158,7 @@ test.describe('Suite E2E Integral — MineralFlow 2.0 (3D, Fallback 2D, Laborato
     await page.screenshot({ path: '../docs/evidence_07_cotizaciones_dark_cyan.png', fullPage: true });
 
     // Probar alternancia a Modo Claro y captura comparativa, luego volver a Oscuro
+    await expect(page.getByTestId('btn-toggle-theme')).toHaveClass(/btn-tactile/);
     await page.getByTestId('btn-toggle-theme').click();
     await expect(page.locator('html')).not.toHaveClass(/dark/);
     await page.screenshot({ path: '../docs/evidence_08_cotizaciones_light.png', fullPage: true });

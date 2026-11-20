@@ -243,7 +243,7 @@ export function ReportesEstadisticasPage() {
             type="button"
             onClick={() => exportarReporteGeneralPDF(datosReporte)}
             data-testid="btn-reporte-pdf"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold shadow-sm transition"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold shadow-sm btn-tactile cursor-pointer"
           >
             <FileDown className="w-4 h-4" />
             <span>Descargar Reporte PDF</span>
@@ -253,7 +253,7 @@ export function ReportesEstadisticasPage() {
             type="button"
             onClick={() => exportarReporteGeneralExcel(datosReporte)}
             data-testid="btn-reporte-excel"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm transition"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-sm btn-tactile cursor-pointer"
           >
             <FileSpreadsheet className="w-4 h-4" />
             <span>Descargar Excel</span>
@@ -262,7 +262,7 @@ export function ReportesEstadisticasPage() {
           <button
             type="button"
             onClick={() => window.print()}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#CBD5E1] dark:border-[#1A364E] bg-[#F1F5F9] dark:bg-[#0F2232] text-[#0F172A] dark:text-[#F8FAFC] text-xs font-bold transition"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#CBD5E1] dark:border-[#1A364E] bg-[#F1F5F9] dark:bg-[#0F2232] text-[#0F172A] dark:text-[#F8FAFC] text-xs font-bold btn-tactile cursor-pointer"
           >
             <Printer className="w-4 h-4" />
             <span>Imprimir</span>
@@ -353,7 +353,7 @@ export function ReportesEstadisticasPage() {
 
       {/* KPIs Globales */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-cyan-500 rounded-2xl p-4 shadow-sm">
+        <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-cyan-500 rounded-2xl p-4 shadow-sm card-interactive">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase text-cyan-600 dark:text-cyan-400">Lotes Analizados</span>
             <Layers className="w-5 h-5 text-cyan-500" />
@@ -366,7 +366,7 @@ export function ReportesEstadisticasPage() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-violet-500 rounded-2xl p-4 shadow-sm">
+        <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-violet-500 rounded-2xl p-4 shadow-sm card-interactive">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase text-violet-600 dark:text-violet-400">Total Sacos y Peso</span>
             <Package className="w-5 h-5 text-violet-500" />
@@ -379,7 +379,7 @@ export function ReportesEstadisticasPage() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-emerald-500 rounded-2xl p-4 shadow-sm">
+        <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-emerald-500 rounded-2xl p-4 shadow-sm card-interactive">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase text-emerald-600 dark:text-emerald-400">Valor Stock Disponible</span>
             <Coins className="w-5 h-5 text-emerald-500" />
@@ -392,7 +392,7 @@ export function ReportesEstadisticasPage() {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-amber-500 rounded-2xl p-4 shadow-sm">
+        <div className="bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-amber-500 rounded-2xl p-4 shadow-sm card-interactive">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase text-amber-600 dark:text-amber-400">Total Ventas Cerradas</span>
             <TrendingUp className="w-5 h-5 text-amber-500" />

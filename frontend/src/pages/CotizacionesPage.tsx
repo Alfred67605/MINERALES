@@ -399,7 +399,7 @@ export function CotizacionesPage() {
             type="button"
             onClick={() => cambiarDolar('PARALELO')}
             data-testid="btn-dolar-paralelo"
-            className={`text-left p-4 rounded-xl border transition ${
+            className={`text-left p-4 rounded-xl border card-interactive btn-tactile cursor-pointer ${
               (dolarInfo?.modoDolar || 'PARALELO') === 'PARALELO'
                 ? 'bg-emerald-50 dark:bg-emerald-950/35 border-emerald-500 ring-2 ring-emerald-500/30'
                 : 'bg-[#F8FAFC] dark:bg-[#060D14] border-[#CBD5E1] dark:border-[#1A364E] hover:border-emerald-500/60'
@@ -424,7 +424,7 @@ export function CotizacionesPage() {
             type="button"
             onClick={() => cambiarDolar('BCB_REFERENCIAL')}
             data-testid="btn-dolar-bcb-ref"
-            className={`text-left p-4 rounded-xl border transition ${
+            className={`text-left p-4 rounded-xl border card-interactive btn-tactile cursor-pointer ${
               dolarInfo?.modoDolar === 'BCB_REFERENCIAL'
                 ? 'bg-cyan-50 dark:bg-cyan-950/35 border-cyan-500 ring-2 ring-cyan-500/30'
                 : 'bg-[#F8FAFC] dark:bg-[#060D14] border-[#CBD5E1] dark:border-[#1A364E] hover:border-cyan-500/60'
@@ -449,7 +449,7 @@ export function CotizacionesPage() {
             type="button"
             onClick={() => cambiarDolar('BCB_OFICIAL')}
             data-testid="btn-dolar-bcb-oficial"
-            className={`text-left p-4 rounded-xl border transition ${
+            className={`text-left p-4 rounded-xl border card-interactive btn-tactile cursor-pointer ${
               dolarInfo?.modoDolar === 'BCB_OFICIAL'
                 ? 'bg-indigo-50 dark:bg-indigo-950/35 border-indigo-500 ring-2 ring-indigo-500/30'
                 : 'bg-[#F8FAFC] dark:bg-[#060D14] border-[#CBD5E1] dark:border-[#1A364E] hover:border-indigo-500/60'

@@ -24,6 +24,15 @@
     --emerald-light: #ECFDF5;
     --copper-accent: #C2410C;
     --copper-light: #FFEDD5;
+
+    /* Curvas de Aceleración Snappy & Natural (Emil Kowalski animations.dev) */
+    --ease-out-quad: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1);
+    --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
+    --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+    --ease-in-out-cubic: cubic-bezier(0.645, 0.045, 0.355, 1);
+    --ease-spring-subtle: cubic-bezier(0.175, 0.885, 0.32, 1.1);
   }
 
   html.dark, :root.dark {
@@ -260,6 +269,68 @@ html.dark .badge-mineral-cu {
 .density-comfortable table td {
   padding-top: 0.8rem !important;
   padding-bottom: 0.8rem !important;
+}
+
+/* Microinteracciones Táctiles y Animaciones Impecables (Emil Kowalski) */
+.btn-tactile {
+  transition: transform 120ms var(--ease-out-quad), box-shadow 120ms var(--ease-out-quad), background-color 150ms ease, border-color 150ms ease, opacity 150ms ease !important;
+  will-change: transform;
+}
+.btn-tactile:active:not(:disabled) {
+  transform: scale(0.972) !important;
+}
+.btn-tactile:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.card-interactive {
+  transition: transform 180ms var(--ease-out-cubic), box-shadow 180ms var(--ease-out-cubic), border-color 150ms ease !important;
+  will-change: transform;
+}
+.card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+}
+html.dark .card-interactive:hover {
+  box-shadow: 0 10px 25px -5px rgba(6, 182, 212, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.35);
+}
+
+/* Optimización de Rendimiento para Tablas Masivas (Vercel Best Practice) */
+.table-row-perf {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 46px;
+  transition: background-color 120ms ease;
+}
+
+/* Keyframes Entradas Snappy (Modales, Drawers, Dropdowns) */
+@keyframes emilModalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes emilDropdownEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-enter-emil {
+  animation: emilModalEnter 200ms var(--ease-out-quart) forwards;
+}
+
+.dropdown-enter-emil {
+  animation: emilDropdownEnter 160ms var(--ease-out-cubic) forwards;
 }
 
 /* Soporte estricto para accesibilidad de movimiento */

@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { motion } from 'motion/react';
 
 /**
  * Cristal Mineral Geométrico Tecnológico (Cyan / Oro Minero)
  */
-export function MineralCrystalSvg({ className = 'w-8 h-8' }: { className?: string }) {
+export const MineralCrystalSvg = memo(function MineralCrystalSvg({ className = 'w-8 h-8' }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 64 64"
@@ -39,12 +39,12 @@ export function MineralCrystalSvg({ className = 'w-8 h-8' }: { className?: strin
       <circle cx="32" cy="28" r="3" fill="#F59E0B" />
     </svg>
   );
-}
+});
 
 /**
  * Estratos Geológicos y Cordillera Andina para Cabeceras y Fondos
  */
-export function GeologicalStrataBannerSvg({ className = 'w-full h-24' }: { className?: string }) {
+export const GeologicalStrataBannerSvg = memo(function GeologicalStrataBannerSvg({ className = 'w-full h-24' }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 1200 120"
@@ -71,7 +71,7 @@ export function GeologicalStrataBannerSvg({ className = 'w-full h-24' }: { class
         strokeWidth="1.5"
         initial={{ pathLength: 0 }}
         animate={{ pathLength: 1 }}
-        transition={{ duration: 1.4, ease: 'easeOut' }}
+        transition={{ duration: 1.4, ease: [0.165, 0.84, 0.44, 1] }}
       />
       <motion.path
         d="M0 108 L260 72 L520 94 L790 54 L1020 86 L1200 62"
@@ -81,16 +81,16 @@ export function GeologicalStrataBannerSvg({ className = 'w-full h-24' }: { class
         strokeDasharray="6 6"
         initial={{ pathLength: 0 }}
         animate={{ pathLength: 1 }}
-        transition={{ duration: 1.8, ease: 'easeOut' }}
+        transition={{ duration: 1.8, ease: [0.165, 0.84, 0.44, 1] }}
       />
     </svg>
   );
-}
+});
 
 /**
  * Diagrama Vectorial Animado de Flujo de Entradas (Compras) -> Almacén -> Salidas (Ventas)
  */
-export function WarehouseFlowDiagramSvg({
+export const WarehouseFlowDiagramSvg = memo(function WarehouseFlowDiagramSvg({
   disponibles,
   vendidos,
 }: {
@@ -165,12 +165,12 @@ export function WarehouseFlowDiagramSvg({
       </svg>
     </div>
   );
-}
+});
 
 /**
  * Ilustración SVG para Estados Vacíos
  */
-export function EmptyStateMineralSvg({ mensaje = 'No se encontraron lotes con los criterios actuales' }: { mensaje?: string }) {
+export const EmptyStateMineralSvg = memo(function EmptyStateMineralSvg({ mensaje = 'No se encontraron lotes con los criterios actuales' }: { mensaje?: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
       <svg viewBox="0 0 120 100" className="w-28 h-24 mb-4" fill="none" aria-hidden="true">
@@ -197,4 +197,4 @@ export function EmptyStateMineralSvg({ mensaje = 'No se encontraron lotes con lo
       </p>
     </div>
   );
-}
+});

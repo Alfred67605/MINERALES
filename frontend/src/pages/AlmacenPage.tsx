@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useDeferredValue } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Warehouse,
@@ -53,6 +53,7 @@ export function AlmacenPage() {
 
   // Filtros
   const [q, setQ] = useState(searchParams.get('q') || '');
+  const deferredQ = useDeferredValue(q);
   const [estadoFiltro, setEstadoFiltro] = useState<'DISPONIBLE' | 'VENDIDO' | 'TODOS'>('DISPONIBLE');
   const [proveedorId, setProveedorId] = useState('');
   const [ubicacionId, setUbicacionId] = useState('');
@@ -82,7 +83,7 @@ export function AlmacenPage() {
       if (proveedorId) params.set('proveedorId', proveedorId);
       if (ubicacionId) params.set('ubicacionId', ubicacionId);
       if (tipoMineral) params.set('tipoMineral', tipoMineral);
-      if (q.trim()) params.set('q', q.trim());
+      if (deferredQ.trim()) params.set('q', deferredQ.trim());
       params.set('sortBy', sortBy);
       params.set('sortOrder', sortOrder);
 
@@ -109,8 +110,11 @@ export function AlmacenPage() {
   };
 
   useEffect(() => {
-    cargarAlmacen();
-  }, [estadoFiltro, proveedorId, ubicacionId, tipoMineral, q, sortBy, sortOrder]);
+    const timer = setTimeout(() => {
+      cargarAlmacen();
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [estadoFiltro, proveedorId, ubicacionId, tipoMineral, deferredQ, sortBy, sortOrder]);
 
   const resumenInventario = useMemo(() => {
     return calcularResumenEnTiempoReal(lotes, 2, false);
@@ -248,7 +252,7 @@ export function AlmacenPage() {
             <button
               type="button"
               onClick={() => exportarInventarioAlmacenPDF(lotes, cotizaciones, `INVENTARIO (${estadoFiltro})`, tipoCambio)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold btn-tactile cursor-pointer shadow-xs"
               title="Descargar reporte completo en PDF"
             >
               <FileDown className="w-4 h-4" />
@@ -258,7 +262,7 @@ export function AlmacenPage() {
             <button
               type="button"
               onClick={exportarCSV}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-500/15 hover:bg-amber-100 dark:hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 border border-amber-400/50 text-xs font-bold transition shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-500/15 hover:bg-amber-100 dark:hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 border border-amber-400/50 text-xs font-bold btn-tactile cursor-pointer shadow-xs"
               title="Descargar lista en archivo Excel/CSV"
             >
               <Download className="w-4 h-4 text-amber-500" />
@@ -267,7 +271,7 @@ export function AlmacenPage() {
 
             <button
               onClick={() => navigate('/seleccion-venta')}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold shadow-sm transition"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold shadow-sm btn-tactile cursor-pointer"
             >
               <CheckSquare className="w-4 h-4" />
               <span>Vender Lotes</span>
@@ -277,7 +281,7 @@ export function AlmacenPage() {
 
         {/* Resumen rápido del inventario mostrado con Colores Diferenciados */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-4 border-t border-[#CBD5E1] dark:border-[#1A364E]">
-          <div className="bg-[#F8FAFC] dark:bg-[#060D14] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-cyan-500 rounded-xl p-3.5 flex items-center justify-between">
+          <div className="bg-[#F8FAFC] dark:bg-[#060D14] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-cyan-500 rounded-xl p-3.5 flex items-center justify-between card-interactive">
             <div>
               <span className="text-xs font-bold uppercase text-cyan-600 dark:text-cyan-400 block">
                 Lotes Mostrados ({estadoFiltro})
@@ -289,7 +293,7 @@ export function AlmacenPage() {
             <Layers className="w-7 h-7 text-cyan-500" />
           </div>
 
-          <div className="bg-[#F8FAFC] dark:bg-[#060D14] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-violet-500 rounded-xl p-3.5 flex items-center justify-between">
+          <div className="bg-[#F8FAFC] dark:bg-[#060D14] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-violet-500 rounded-xl p-3.5 flex items-center justify-between card-interactive">
             <div>
               <span className="text-xs font-bold uppercase text-violet-600 dark:text-violet-400 block">
                 Total de Sacos
@@ -304,7 +308,7 @@ export function AlmacenPage() {
             <Package className="w-7 h-7 text-violet-500" />
           </div>
 
-          <div className="bg-[#F8FAFC] dark:bg-[#060D14] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-amber-500 rounded-xl p-3.5 flex items-center justify-between">
+          <div className="bg-[#F8FAFC] dark:bg-[#060D14] border border-[#CBD5E1] dark:border-[#1A364E] border-l-4 border-l-amber-500 rounded-xl p-3.5 flex items-center justify-between card-interactive">
             <div>
               <span className="text-xs font-bold uppercase text-amber-600 dark:text-amber-400 block">
                 Peso Total
@@ -319,7 +323,7 @@ export function AlmacenPage() {
             <Scale className="w-7 h-7 text-amber-500" />
           </div>
 
-          <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-500/40 rounded-xl p-3.5">
+          <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-500/40 rounded-xl p-3.5 card-interactive">
             <span className="text-xs font-bold uppercase text-emerald-700 dark:text-emerald-300 block">
               Valor Estimado Stock
             </span>
@@ -577,7 +581,7 @@ export function AlmacenPage() {
                       const esDisponible = lote.estado === 'DISPONIBLE';
                       const vl = calcularValorizacionLote(lote, cotizaciones, false, tipoCambio);
                       return (
-                        <tr key={lote.id} className="hover:bg-[#F8FAFC] dark:hover:bg-[#0F2232]/60 transition">
+                        <tr key={lote.id} className="table-row-perf hover:bg-[#F8FAFC] dark:hover:bg-[#0F2232]/60">
                           <td className="py-3 px-4 font-mono-num font-bold text-[#0F172A] dark:text-[#F8FAFC]">
                             {lote.numeroLote}
                             <span className="block text-[10px] font-normal text-[#64748B] dark:text-[#94A3B8]">
@@ -655,7 +659,7 @@ export function AlmacenPage() {
                                 setLoteDetalle(lote);
                                 setNuevaUbicacionId(lote.ubicacionId || ubicaciones[0]?.id || '');
                               }}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-[#0891B2] dark:text-[#22D3EE] bg-cyan-50 dark:bg-[#06B6D4]/15 hover:bg-cyan-100 dark:hover:bg-[#06B6D4]/25 border border-[#06B6D4]/40 transition"
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-[#0891B2] dark:text-[#22D3EE] bg-cyan-50 dark:bg-[#06B6D4]/15 hover:bg-cyan-100 dark:hover:bg-[#06B6D4]/25 border border-[#06B6D4]/40 btn-tactile cursor-pointer"
                             >
                               <Eye className="w-3.5 h-3.5" />
                               <span>Ver Ficha</span>
@@ -738,7 +742,7 @@ export function AlmacenPage() {
               initial={{ x: 480 }}
               animate={{ x: 0 }}
               exit={{ x: 480 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
+              transition={{ duration: 0.22, ease: [0.165, 0.84, 0.44, 1] }}
               className="w-full max-w-lg bg-white dark:bg-[#0A1622] h-full shadow-2xl border-l border-[#CBD5E1] dark:border-[#06B6D4] flex flex-col overflow-hidden"
             >
               <div className="px-6 py-4 bg-gradient-to-r from-[#071320] to-[#0F2232] border-b border-[#06B6D4]/40 text-white flex items-center justify-between">

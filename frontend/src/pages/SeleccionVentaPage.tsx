@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useRef } from 'react';
+import React, { useEffect, useState, useMemo, useRef, useDeferredValue } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   CheckSquare,
@@ -55,6 +55,7 @@ export function SeleccionVentaPage() {
 
   // Filtros
   const [q, setQ] = useState('');
+  const deferredQ = useDeferredValue(q);
   const [proveedorId, setProveedorId] = useState('');
   const [minaOrigen, setMinaOrigen] = useState('');
   const [tipoMineral, setTipoMineral] = useState('');
@@ -146,8 +147,8 @@ export function SeleccionVentaPage() {
         const fLote = lote.fechaCompra.slice(0, 10);
         if (fLote > hasta) return false;
       }
-      if (q.trim()) {
-        const term = q.trim().toLowerCase();
+      if (deferredQ.trim()) {
+        const term = deferredQ.trim().toLowerCase();
         const coincide =
           lote.numeroLote.toLowerCase().includes(term) ||
           lote.proveedorNombre.toLowerCase().includes(term) ||
@@ -166,7 +167,7 @@ export function SeleccionVentaPage() {
     tipoMineral,
     desde,
     hasta,
-    q,
+    deferredQ,
   ]);
 
   const totalPaginas = Math.max(1, Math.ceil(lotesFiltrados.length / porPagina));
@@ -469,7 +470,7 @@ export function SeleccionVentaPage() {
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mt-4">
-          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#060D14] border border-[#E2E8F0] dark:border-[#152E42]">
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#060D14] border border-[#E2E8F0] dark:border-[#152E42] card-interactive">
             <span className="text-xs text-[#64748B] dark:text-[#94A3B8] block">Sacos y Peso / Saco</span>
             <span className="text-lg font-mono-num font-bold text-[#0F172A] dark:text-[#F8FAFC]">
               {formatearEnteroBolivia(valorizacionSeleccion.totalSacos)} sacos
@@ -479,7 +480,7 @@ export function SeleccionVentaPage() {
             </span>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#060D14] border border-[#E2E8F0] dark:border-[#152E42]">
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#060D14] border border-[#E2E8F0] dark:border-[#152E42] card-interactive">
             <span className="text-xs text-[#64748B] dark:text-[#94A3B8] block">Valor Bruto</span>
             <span className="text-lg font-mono-num font-bold text-[#0F172A] dark:text-[#F8FAFC]">
               {formatearMonedaBob(valorizacionSeleccion.valorBrutoTotalBob)}
@@ -489,7 +490,7 @@ export function SeleccionVentaPage() {
             </span>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#060D14] border border-[#E2E8F0] dark:border-[#152E42]">
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-[#060D14] border border-[#E2E8F0] dark:border-[#152E42] card-interactive">
             <span className="text-xs text-[#64748B] dark:text-[#94A3B8] block">Regalía Minera (Ley 535)</span>
             <span className="text-lg font-mono-num font-bold text-rose-600 dark:text-rose-400">
               - {formatearMonedaBob(valorizacionSeleccion.regaliaTotalBob)}
@@ -499,7 +500,7 @@ export function SeleccionVentaPage() {
             </span>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-500/40">
+          <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-500/40 card-interactive">
             <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 block">Total a Recibir (Bs)</span>
             <span className="text-xl font-mono-num font-extrabold text-emerald-700 dark:text-emerald-300" data-testid="resumen-total-bs">
               {formatearMonedaBob(valorizacionSeleccion.valorNetoTotalBob)}
@@ -509,7 +510,7 @@ export function SeleccionVentaPage() {
             </span>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/25 border border-amber-500/40">
+          <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/25 border border-amber-500/40 card-interactive">
             <span className="text-xs font-bold text-amber-700 dark:text-amber-300 block">Promedio por Saco / Lote</span>
             <span className="text-lg font-mono-num font-extrabold text-amber-700 dark:text-amber-300" data-testid="resumen-bs-saco">
               {formatearMonedaBob(valorizacionSeleccion.valorPromedioPorSacoBob)} / saco
@@ -925,7 +926,7 @@ export function SeleccionVentaPage() {
                       key={lote.id}
                       onClick={(e) => manejarClicFila(lote.id, e)}
                       data-testid={`fila-lote-${lote.numeroLote}`}
-                      className={`cursor-pointer transition-colors ${
+                      className={`cursor-pointer table-row-perf ${
                         marcado
                           ? 'bg-cyan-50 dark:bg-[#06B6D4]/15 hover:bg-cyan-100 dark:hover:bg-[#06B6D4]/25'
                           : 'hover:bg-slate-100 dark:hover:bg-[#0F2232]/60'
@@ -1147,7 +1148,7 @@ export function SeleccionVentaPage() {
             <button
               type="button"
               onClick={() => setVerSoloSeleccionados((v) => !v)}
-              className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition"
+              className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white btn-tactile cursor-pointer"
             >
               {verSoloSeleccionados ? 'Ver Todos' : 'Revisar Grupo'}
             </button>
@@ -1165,7 +1166,7 @@ export function SeleccionVentaPage() {
                 setModalConfirmarAbierto(true);
               }}
               data-testid="btn-continuar-venta"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 disabled:opacity-40 text-white text-xs font-bold shadow-md transition"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 disabled:opacity-40 text-white text-xs font-bold shadow-md btn-tactile cursor-pointer"
             >
               <span>Continuar con la Venta</span>
               <ArrowRight className="w-4 h-4 text-amber-300" />
@@ -1186,7 +1187,7 @@ export function SeleccionVentaPage() {
           aria-modal="true"
           aria-label="Confirmar y Cerrar Venta de Lotes"
         >
-          <div className="bg-slate-50 dark:bg-[#060D14] border-2 border-violet-500/50 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+          <div className="modal-enter-emil bg-slate-50 dark:bg-[#060D14] border-2 border-violet-500/50 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col overflow-hidden">
             <div className="px-6 py-4 bg-gradient-to-r from-violet-700 to-cyan-700 text-white flex items-center justify-between">
               <div>
                 <span className="text-[10px] font-mono-num uppercase tracking-widest text-amber-300">
@@ -1368,7 +1369,7 @@ export function SeleccionVentaPage() {
                 <button
                   type="button"
                   onClick={() => setModalConfirmarAbierto(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#1A364E] font-bold text-slate-600 dark:text-[#94A3B8]"
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-[#1A364E] font-bold text-slate-600 dark:text-[#94A3B8] btn-tactile cursor-pointer"
                 >
                   Revisar Selección
                 </button>
@@ -1376,7 +1377,7 @@ export function SeleccionVentaPage() {
                   type="submit"
                   disabled={confirmando}
                   data-testid="btn-confirmar-cierre-venta"
-                  className="px-6 py-2.5 rounded-xl bg-[#0891B2] dark:bg-[#06B6D4] hover:bg-[#0e7490] dark:hover:bg-[#22D3EE] text-white font-bold shadow-md disabled:opacity-60"
+                  className="px-6 py-2.5 rounded-xl bg-[#0891B2] dark:bg-[#06B6D4] hover:bg-[#0e7490] dark:hover:bg-[#22D3EE] text-white font-bold shadow-md disabled:opacity-60 btn-tactile cursor-pointer"
                 >
                   {confirmando
                     ? 'Ejecutando transacción atómica...'

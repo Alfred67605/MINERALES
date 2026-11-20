@@ -250,7 +250,7 @@ export function RespaldoPage() {
           <button
             type="button"
             onClick={() => inputArchivo.current?.click()}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#F1F5F9] dark:bg-[#0F2232] border border-[#CBD5E1] dark:border-[#1A364E] text-[#0F172A] dark:text-[#F8FAFC] text-sm font-bold hover:border-amber-500 transition"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#F1F5F9] dark:bg-[#0F2232] border border-[#CBD5E1] dark:border-[#1A364E] text-[#0F172A] dark:text-[#F8FAFC] text-sm font-bold hover:border-amber-500 btn-tactile cursor-pointer"
           >
             <Upload className="w-4 h-4 text-amber-500" />
             <span>Subir & Restaurar</span>
@@ -260,7 +260,7 @@ export function RespaldoPage() {
             onClick={crear}
             disabled={trabajando}
             data-testid="btn-crear-respaldo"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-sm font-bold shadow-sm transition disabled:opacity-60"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-sm font-bold shadow-sm disabled:opacity-60 btn-tactile cursor-pointer"
           >
             <Download className="w-4 h-4" />
             <span>{trabajando ? 'Generando...' : 'Generar Respaldo Ahora'}</span>

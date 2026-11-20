@@ -221,7 +221,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
           <button
             onClick={() => setSidebarAbierto((s) => !s)}
-            className="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] dark:hover:text-white hover:bg-[#F1F5F9] dark:hover:bg-[#162E44] transition"
+            className="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] dark:hover:text-white hover:bg-[#F1F5F9] dark:hover:bg-[#162E44] btn-tactile cursor-pointer"
             title={sidebarAbierto ? 'Contraer panel lateral' : 'Expandir panel lateral'}
             aria-label={sidebarAbierto ? 'Contraer menú lateral' : 'Expandir menú lateral'}
           >
@@ -433,7 +433,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               type="button"
               onClick={() => setTema(tema === 'dark' ? 'light' : 'dark')}
               data-testid="btn-toggle-theme"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition bg-amber-50 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-500/20"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border btn-tactile cursor-pointer bg-amber-50 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-500/20"
               title={tema === 'dark' ? 'Cambiar a Fondo Claro' : 'Cambiar a Fondo Azul Oscuro'}
             >
               {tema === 'dark' ? (
@@ -455,7 +455,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               onClick={() =>
                 setDensidad(densidad === 'comfortable' ? 'compact' : 'comfortable')
               }
-              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-violet-50 dark:bg-violet-500/10 border border-violet-300 dark:border-violet-500/40 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-500/20 transition"
+              className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold btn-tactile cursor-pointer bg-violet-50 dark:bg-violet-500/10 border border-violet-300 dark:border-violet-500/40 text-violet-700 dark:text-violet-300 hover:bg-violet-100 dark:hover:bg-violet-500/20"
               title="Cambiar espacio entre filas en las tablas"
             >
               <Rows3 className="w-4 h-4 text-violet-600 dark:text-violet-400" />
@@ -467,7 +467,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               type="button"
               onClick={() => navigate('/cotizaciones')}
               data-testid="btn-topbar-dolar"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono-num font-bold bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-400/50 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-500/25 transition"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono-num font-bold btn-tactile cursor-pointer bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-400/50 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-500/25"
               title="Tipo de cambio activo del Dólar (BCB / Paralelo) — Clic para cambiar"
             >
               <span>$US: {formatearNumeroBolivia(tipoCambioDolar, 2)} Bs</span>
@@ -476,7 +476,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               onClick={() => navigate('/cotizaciones')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:from-amber-400 hover:to-orange-400 shadow-xs transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold btn-tactile cursor-pointer bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 hover:from-amber-400 hover:to-orange-400 shadow-xs"
               title="Ver y modificar precios de minerales"
             >
               <TrendingUp className="w-4 h-4 text-slate-950" />
@@ -488,7 +488,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <button
                 type="button"
                 onClick={() => setNotificacionesAbiertas((n) => !n)}
-                className="p-2 rounded-xl bg-white dark:bg-[#0F2232] border border-[#CBD5E1] dark:border-[#1A364E] text-[#0F172A] dark:text-[#F8FAFC] hover:border-[#0891B2] relative"
+                className="p-2 rounded-xl bg-white dark:bg-[#0F2232] border border-[#CBD5E1] dark:border-[#1A364E] text-[#0F172A] dark:text-[#F8FAFC] hover:border-[#0891B2] btn-tactile cursor-pointer relative"
                 aria-label="Avisos del sistema"
               >
                 <Bell className="w-4 h-4 text-[#0891B2] dark:text-[#06B6D4]" />
@@ -496,7 +496,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </button>
 
               {notificacionesAbiertas && (
-                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] rounded-2xl shadow-xl p-4 z-50 text-xs space-y-2.5 text-[#0F172A] dark:text-[#F8FAFC]">
+                <div className="dropdown-enter-emil absolute right-0 mt-2 w-80 bg-white dark:bg-[#0A1622] border border-[#CBD5E1] dark:border-[#1A364E] rounded-2xl shadow-xl p-4 z-50 text-xs space-y-2.5 text-[#0F172A] dark:text-[#F8FAFC]">
                   <div className="flex items-center justify-between border-b border-[#CBD5E1] dark:border-[#1A364E] pb-2">
                     <span className="font-bold">Resumen Rápido</span>
                     <button

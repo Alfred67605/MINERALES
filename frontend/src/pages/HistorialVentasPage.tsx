@@ -248,7 +248,7 @@ export function HistorialVentasPage() {
                 {ventas.map((v) => {
                   const valV = calcularValorizacionGrupo(v.detalles || [], cotizaciones, false, tipoCambio);
                   return (
-                  <tr key={v.id} className="hover:bg-slate-100 dark:hover:bg-[#0F2232]/50 transition">
+                  <tr key={v.id} className="table-row-perf hover:bg-slate-100 dark:hover:bg-[#0F2232]/50">
                     <td className="py-3 px-4 font-mono-num font-bold text-amber-600 dark:text-[#06B6D4]">
                       {v.numeroVenta}
                     </td>
@@ -298,7 +298,7 @@ export function HistorialVentasPage() {
                         <button
                           onClick={() => setVentaSeleccionada(v)}
                           data-testid={`btn-detalle-venta-${v.numeroVenta}`}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#0891B2] dark:bg-[#06B6D4] text-white hover:bg-[#0e7490] dark:hover:bg-[#22D3EE] transition"
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold bg-[#0891B2] dark:bg-[#06B6D4] text-white hover:bg-[#0e7490] dark:hover:bg-[#22D3EE] btn-tactile cursor-pointer"
                         >
                           <Eye className="w-3.5 h-3.5" />
                           <span>Abrir Venta</span>
@@ -321,7 +321,7 @@ export function HistorialVentasPage() {
           role="dialog"
           aria-modal="true"
         >
-          <div className="bg-white dark:bg-[#0A1622] border-2 border-[#0891B2]/40 dark:border-[#06B6D4]/40 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[92vh] flex flex-col overflow-hidden">
+          <div className="modal-enter-emil bg-white dark:bg-[#0A1622] border-2 border-[#0891B2]/40 dark:border-[#06B6D4]/40 rounded-2xl shadow-2xl max-w-5xl w-full max-h-[92vh] flex flex-col overflow-hidden">
             {/* Cabecera del modal */}
             <div className="px-6 py-4 bg-[#071320] dark:bg-[#060D14] text-white flex flex-wrap items-center justify-between gap-3 no-print">
               <div>
