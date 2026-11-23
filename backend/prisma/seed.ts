@@ -4,6 +4,15 @@ import { Decimal } from 'decimal.js';
 import { calcularResumenLotes, convertirPesoAKg, LoteCalculoInput } from '../src/utils/calculations.js';
 import { upgradeDataNonDestructive } from './upgrade_v2_data.js';
 
+if (process.env.DATABASE_URL) {
+  if (process.env.DATABASE_URL.includes('#@')) {
+    process.env.DATABASE_URL = process.env.DATABASE_URL.replace(/#@/g, '%23@');
+  }
+  if (!process.env.DATABASE_URL.includes('schema=')) {
+    process.env.DATABASE_URL += (process.env.DATABASE_URL.includes('?') ? '&' : '?') + 'schema=public';
+  }
+}
+
 const prisma = new PrismaClient();
 
 export async function seedDatabase() {

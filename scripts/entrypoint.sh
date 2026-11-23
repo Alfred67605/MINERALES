@@ -4,6 +4,29 @@ echo "=========================================================="
 echo "🚀 INICIANDO KOYOSIAT S.R.L. EN DOKPLOY"
 echo "=========================================================="
 
+# Auto-sanitizar `#` en contraseñas de DATABASE_URL si no está codificado como %23
+if [ -n "$DATABASE_URL" ]; then
+  case "$DATABASE_URL" in
+    *#@*)
+      echo "🔧 Codificando automáticamente '#' en DATABASE_URL a '%23'..."
+      DATABASE_URL=$(echo "$DATABASE_URL" | sed 's/#@/%23@/g')
+      export DATABASE_URL
+      ;;
+  esac
+  case "$DATABASE_URL" in
+    *schema=*)
+      ;;
+    *)
+      if echo "$DATABASE_URL" | grep -q '?'; then
+        DATABASE_URL="${DATABASE_URL}&schema=public"
+      else
+        DATABASE_URL="${DATABASE_URL}?schema=public"
+      fi
+      export DATABASE_URL
+      ;;
+  esac
+fi
+
 # 1. Verificar si DATABASE_URL está configurada
 if [ -n "$DATABASE_URL" ]; then
   echo "📡 DATABASE_URL detectada. Sincronizando con PostgreSQL..."

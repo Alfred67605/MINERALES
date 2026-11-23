@@ -17,6 +17,16 @@ import { respaldosRoutes } from './routes/respaldos.js';
 
 dotenv.config();
 
+// Auto-sanitización de DATABASE_URL si contiene caracteres especiales no codificados (como '#' en contraseñas)
+if (process.env.DATABASE_URL) {
+  if (process.env.DATABASE_URL.includes('#@')) {
+    process.env.DATABASE_URL = process.env.DATABASE_URL.replace(/#@/g, '%23@');
+  }
+  if (!process.env.DATABASE_URL.includes('schema=')) {
+    process.env.DATABASE_URL += (process.env.DATABASE_URL.includes('?') ? '&' : '?') + 'schema=public';
+  }
+}
+
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
     logger: process.env.NODE_ENV !== 'test',
