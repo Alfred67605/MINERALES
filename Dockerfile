@@ -54,6 +54,6 @@ COPY --from=frontend-builder /app/frontend/dist /app/client-dist
 COPY scripts/entrypoint.sh /app/entrypoint.sh
 RUN sed -i 's/\r$//' /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
-EXPOSE 3001
+EXPOSE 3001 80
 
 CMD ["/app/entrypoint.sh"]

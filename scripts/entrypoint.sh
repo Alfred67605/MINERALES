@@ -4,6 +4,18 @@ echo "=========================================================="
 echo "🚀 INICIANDO KOYOSIAT S.R.L. EN DOKPLOY"
 echo "=========================================================="
 
+# Si no hay DATABASE_URL pero sí hay variables individuales (DB_HOST, etc.), construirla automáticamente
+if [ -z "$DATABASE_URL" ] && [ -n "$DB_HOST" ]; then
+  DB_USER="${DB_USERNAME:-postgres}"
+  DB_PASS="${DB_PASSWORD:-}"
+  DB_PORT_VAL="${DB_PORT:-5432}"
+  DB_NAME="${DB_DATABASE:-koyosiat_db}"
+  DB_PASS_ENC=$(echo "$DB_PASS" | sed 's/#/%23/g')
+  DATABASE_URL="postgresql://${DB_USER}:${DB_PASS_ENC}@${DB_HOST}:${DB_PORT_VAL}/${DB_NAME}?schema=public"
+  export DATABASE_URL
+  echo "📡 DATABASE_URL construida automáticamente desde variables DB_HOST/DB_DATABASE."
+fi
+
 # Auto-sanitizar `#` en contraseñas de DATABASE_URL si no está codificado como %23
 if [ -n "$DATABASE_URL" ]; then
   case "$DATABASE_URL" in

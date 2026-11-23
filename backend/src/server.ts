@@ -17,6 +17,16 @@ import { respaldosRoutes } from './routes/respaldos.js';
 
 dotenv.config();
 
+// Si el usuario configuró variables individuales estilo Laravel (DB_HOST, DB_DATABASE, etc.), construir DATABASE_URL
+if (!process.env.DATABASE_URL && process.env.DB_HOST) {
+  const user = encodeURIComponent(process.env.DB_USERNAME || 'postgres');
+  const pass = encodeURIComponent(process.env.DB_PASSWORD || '');
+  const host = process.env.DB_HOST;
+  const port = process.env.DB_PORT || '5432';
+  const db = process.env.DB_DATABASE || 'koyosiat_db';
+  process.env.DATABASE_URL = `postgresql://${user}:${pass}@${host}:${port}/${db}?schema=public`;
+}
+
 // Auto-sanitización de DATABASE_URL si contiene caracteres especiales no codificados (como '#' en contraseñas)
 if (process.env.DATABASE_URL) {
   if (process.env.DATABASE_URL.includes('#@')) {
@@ -89,7 +99,24 @@ if (isMainModule) {
     const port = Number(process.env.PORT) || 3001;
     try {
       await app.listen({ port, host: '0.0.0.0' });
-      console.log(`🚀 KOYOSIAT S.R.L. API ejecutándose en http://localhost:${port}`);
+      console.log(`🚀 KOYOSIAT S.R.L. API ejecutándose en http://0.0.0.0:${port}`);
+
+      // Escuchar también en el puerto alternativo (80 o 3001) para máxima compatibilidad con Dokploy
+      const altPort = port === 80 ? 3001 : 80;
+      try {
+        const http = await import('http');
+        const altServer = http.createServer((req, res) => {
+          (app.server as any).emit('request', req, res);
+        });
+        altServer.on('error', (err: any) => {
+          console.warn(`Puerto secundario ${altPort} no disponible (ignorado si no es necesario):`, err.message);
+        });
+        altServer.listen(altPort, '0.0.0.0', () => {
+          console.log(`🚀 KOYOSIAT S.R.L. Puerto secundario activo en http://0.0.0.0:${altPort}`);
+        });
+      } catch (altErr) {
+        // Ignorar si no se puede abrir el puerto secundario
+      }
     } catch (err) {
       app.log.error(err);
       process.exit(1);

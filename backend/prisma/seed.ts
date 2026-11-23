@@ -4,6 +4,16 @@ import { Decimal } from 'decimal.js';
 import { calcularResumenLotes, convertirPesoAKg, LoteCalculoInput } from '../src/utils/calculations.js';
 import { upgradeDataNonDestructive } from './upgrade_v2_data.js';
 
+// Si el usuario configuró variables individuales estilo Laravel (DB_HOST, DB_DATABASE, etc.), construir DATABASE_URL
+if (!process.env.DATABASE_URL && process.env.DB_HOST) {
+  const user = encodeURIComponent(process.env.DB_USERNAME || 'postgres');
+  const pass = encodeURIComponent(process.env.DB_PASSWORD || '');
+  const host = process.env.DB_HOST;
+  const port = process.env.DB_PORT || '5432';
+  const db = process.env.DB_DATABASE || 'koyosiat_db';
+  process.env.DATABASE_URL = `postgresql://${user}:${pass}@${host}:${port}/${db}?schema=public`;
+}
+
 if (process.env.DATABASE_URL) {
   if (process.env.DATABASE_URL.includes('#@')) {
     process.env.DATABASE_URL = process.env.DATABASE_URL.replace(/#@/g, '%23@');
