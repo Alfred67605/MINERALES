@@ -21,7 +21,6 @@
     "@prisma/client": "^6.4.1",
     "bcryptjs": "^3.0.2",
     "decimal.js": "^10.5.0",
-    "Decimal.js": "npm:decimal.js@^10.5.0",
     "dotenv": "^16.4.7",
     "fastify": "^5.2.1",
     "prisma": "^6.4.1",
