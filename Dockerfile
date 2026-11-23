@@ -52,7 +52,7 @@ COPY --from=frontend-builder /app/frontend/dist /app/client-dist
 
 # Copiar script de arranque con migraciones automáticas
 COPY scripts/entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+RUN sed -i 's/\r$//' /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 EXPOSE 3001
 
