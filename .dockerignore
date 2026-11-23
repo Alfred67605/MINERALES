@@ -1,0 +1,12 @@
+node_modules
+*/node_modules
+.git
+.github
+.vscode
+.pgdata
+docs
+test-results
+backups
+hyperframes
+scratch
+*.log

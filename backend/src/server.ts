@@ -3,6 +3,9 @@ import cors from '@fastify/cors';
 import cookie from '@fastify/cookie';
 import jwt from '@fastify/jwt';
 import dotenv from 'dotenv';
+import fastifyStatic from '@fastify/static';
+import path from 'path';
+import fs from 'fs';
 import { authRoutes } from './routes/auth.js';
 import { catalogRoutes } from './routes/catalogs.js';
 import { comprasLotesRoutes } from './routes/comprasLotes.js';
@@ -42,6 +45,26 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(operacionesV2Routes);
   await app.register(cotizacionesRoutes);
   await app.register(respaldosRoutes);
+
+  // Servir frontend compilado en producción con fallback a index.html (SPA)
+  const clientDist = process.env.CLIENT_DIST
+    ? path.resolve(process.env.CLIENT_DIST)
+    : path.resolve(process.cwd(), '../frontend/dist');
+
+  if (fs.existsSync(clientDist)) {
+    await app.register(fastifyStatic, {
+      root: clientDist,
+      prefix: '/',
+    });
+
+    app.setNotFoundHandler((req, reply) => {
+      if (req.raw.url && req.raw.url.startsWith('/api')) {
+        reply.status(404).send({ error: 'Endpoint no encontrado', url: req.raw.url });
+      } else {
+        reply.sendFile('index.html');
+      }
+    });
+  }
 
   return app;
 }
